@@ -1,4 +1,4 @@
-# Analysis-and-Visualization-of-Online-Ride-Hailing-Order-Data
+# Ride-Hailing-Analyzer
 Final project for CS241
 
 # Notes
