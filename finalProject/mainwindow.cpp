@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "fileThread.h"
+#include "progressBarThread.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -48,9 +50,11 @@ void MainWindow::setupSignalSlots()
 
 void MainWindow::loadFile()
 {
-
+    FileThread* fileThread = new FileThread(&mainData, &gridData);
+    connect(fileThread, &FileThread::resultReady, this, &MainWindow::handleFileResults);
+    connect(fileThread, &FileThread::finished, fileThread, &QObject::deleteLater);
     QString dirName = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-                                                        "../Dataset-CS241-2020/",
+                                                        "../",
                                                         QFileDialog::ShowDirsOnly
                                                         | QFileDialog::DontResolveSymlinks);
     //qDebug() <<dirName;
@@ -59,68 +63,18 @@ void MainWindow::loadFile()
     QStringList nameFilters;
     nameFilters << "*.csv";
     QStringList fileList = dir.entryList(nameFilters, QDir::Files|QDir::Readable, QDir::Name);
-
     //qDebug() <<fileList;
+    allFileNum = fileList.count();
+    fileThread->fileList = fileList;
+    fileThread->directory = dir;
+    fileThread->start();
 
-    QList<QList<double>> oneDayData;
-    for(int i = 0;i<fileList.size()-1;++i){
-        QFile file(dir.filePath(fileList[i]));
-
-        if(i % 5 == 0){
-            oneDayData.clear();
-        }
-
-        if(file.open(QIODevice::ReadOnly)){
-            qDebug()<<file<<'\n';
-            QTextStream stream(&file);
-            int lineNum = 0;
-            while(true){
-                QString line = stream.readLine();
-                if(!lineNum){
-                    ++lineNum;
-                    continue;
-                }
-                if(line.isEmpty()){
-                    break;
-                }
-                QList<double> row;
-                for(auto n:line.split(',')){
-                    row.append(n.trimmed().toDouble());
-                }
-                oneDayData.append(row);
-            }
-        }
-        file.close();
-        if(i % 5 == 4){
-            mainData.append(oneDayData);
-        }
-    }
-
-
-    QFile file(dir.filePath(fileList[fileList.size()-1]));
-    if(file.open(QIODevice::ReadOnly)){
-        qDebug()<<file<<'\n';
-        QTextStream stream(&file);
-        int lineNum = 0;
-        while(true){
-            QString line = stream.readLine();
-            if(!lineNum){
-                ++lineNum;
-                continue;
-            }
-            if(line.isEmpty()){
-                break;
-            }
-            QList<double> row;
-            for(auto n:line.split(',')){
-                row.append(n.trimmed().toDouble());
-            }
-            gridData.append(row);
-        }
-    }
-    file.close();
-    //qDebug() <<mainData.size()<<mainData[0].size()<<mainData[0][0].size();
-    //qDebug() <<gridData.size()<<gridData[0].size();
+    ProgressBarThread* progressBarThread = new ProgressBarThread(ui->UIprogressBar);
+    connect(progressBarThread, &ProgressBarThread::resultReady, this, &MainWindow::handlePBResults);
+    connect(progressBarThread, &ProgressBarThread::finished, progressBarThread, &QObject::deleteLater);
+    ui->UIprogressBar->setMinimum(0);
+    ui->UIprogressBar->setMaximum(allFileNum);
+    progressBarThread->start();
 }
 
 

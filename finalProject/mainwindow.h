@@ -2,12 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QMessageBox>
-#include <QFileDialog>
 #include <QDebug>
-#include <QTextBrowser>
-#include <QList>
-
+#include "dataForm.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -24,6 +20,13 @@ public:
 private slots:
     void loadFile();
     //void display();
+    void handleFileResults(){
+        qDebug()<<"Load successfully.";
+    }
+    void handlePBResults(){
+
+    }
+
 
 
 private:
@@ -39,9 +42,8 @@ private:
     QAction* displayTravelTimeAction;
     QAction* displayFeeAction;
 
-    QList<QList<QList<double>>> mainData;
-
-    QList<QList<double>> gridData;
+    QVector<QVector<orderDataForm>> mainData;
+    QVector<gridDataForm> gridData;
 
 };
 #endif // MAINWINDOW_H
