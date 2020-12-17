@@ -1,19 +1,19 @@
 #ifndef FILETHREAD_H
 #define FILETHREAD_H
 
-#include <QThread>
-#include <QMessageBox>
-#include <QFileDialog>
-#include <QDebug>
-#include <QTextBrowser>
-#include <QDir>
-#include <QVector>
-#include <QProgressBar>
 #include "dataForm.h"
 #include "global.h"
+#include <QDebug>
+#include <QDir>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QProgressBar>
+#include <QTextBrowser>
+#include <QThread>
+#include <QVector>
+#include <algorithm>
 
-class FileThread:public QThread
-{
+class FileThread : public QThread {
     Q_OBJECT
 
 public:
@@ -26,7 +26,7 @@ public:
     quint16 fileNum = 0;
 
 signals:
-    void resultReady(const QString &s);
+    void resultReady(const QString& s);
     void fileNumChanged(quint16);
 
 private:
@@ -35,4 +35,4 @@ private:
     QProgressBar* PB;
 };
 
-#endif // FILETHREAD_H
+#endif// FILETHREAD_H

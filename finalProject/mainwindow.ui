@@ -82,7 +82,7 @@
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_11">
             <item>
-             <widget class="QRadioButton" name="radioButton_2">
+             <widget class="QRadioButton" name="allGridRadioButton">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -100,7 +100,7 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout">
               <item>
-               <widget class="QRadioButton" name="radioButton">
+               <widget class="QRadioButton" name="oneGridRadioButton">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -116,7 +116,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QSpinBox" name="spinBox"/>
+               <widget class="QSpinBox" name="gridNum"/>
               </item>
              </layout>
             </item>
@@ -275,7 +275,35 @@
              </widget>
             </item>
             <item>
-             <widget class="QDateTimeEdit" name="startTimeEdit"/>
+             <widget class="QDateTimeEdit" name="startTimeEdit">
+              <property name="date">
+               <date>
+                <year>2016</year>
+                <month>11</month>
+                <day>1</day>
+               </date>
+              </property>
+              <property name="maximumDateTime">
+               <datetime>
+                <hour>23</hour>
+                <minute>59</minute>
+                <second>59</second>
+                <year>2016</year>
+                <month>11</month>
+                <day>15</day>
+               </datetime>
+              </property>
+              <property name="minimumDateTime">
+               <datetime>
+                <hour>0</hour>
+                <minute>0</minute>
+                <second>0</second>
+                <year>2016</year>
+                <month>11</month>
+                <day>1</day>
+               </datetime>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QLabel" name="label_5">
@@ -291,7 +319,45 @@
              </widget>
             </item>
             <item>
-             <widget class="QDateTimeEdit" name="endTimeEdit"/>
+             <widget class="QDateTimeEdit" name="endTimeEdit">
+              <property name="dateTime">
+               <datetime>
+                <hour>23</hour>
+                <minute>59</minute>
+                <second>59</second>
+                <year>2016</year>
+                <month>11</month>
+                <day>15</day>
+               </datetime>
+              </property>
+              <property name="time">
+               <time>
+                <hour>23</hour>
+                <minute>59</minute>
+                <second>59</second>
+               </time>
+              </property>
+              <property name="maximumDateTime">
+               <datetime>
+                <hour>23</hour>
+                <minute>59</minute>
+                <second>59</second>
+                <year>2016</year>
+                <month>11</month>
+                <day>15</day>
+               </datetime>
+              </property>
+              <property name="minimumDateTime">
+               <datetime>
+                <hour>0</hour>
+                <minute>0</minute>
+                <second>0</second>
+                <year>2016</year>
+                <month>11</month>
+                <day>1</day>
+               </datetime>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QLabel" name="label_6">
@@ -307,7 +373,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="comboBox">
+             <widget class="QComboBox" name="timeStepComboBox">
               <item>
                <property name="text">
                 <string>1 minute</string>
@@ -375,23 +441,23 @@
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
-             <widget class="QPushButton" name="pushButton_2">
+             <widget class="QPushButton" name="STDemandButton">
               <property name="text">
                <string>Spatio-temporal demand</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_3">
+             <widget class="QPushButton" name="travelTimeButton">
               <property name="text">
-               <string>PushButton</string>
+               <string>Travel time</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_4">
+             <widget class="QPushButton" name="orderFeesButton">
               <property name="text">
-               <string>PushButton</string>
+               <string>Order fees</string>
               </property>
              </widget>
             </item>
@@ -430,7 +496,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>

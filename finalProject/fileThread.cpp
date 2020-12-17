@@ -9,7 +9,6 @@ FileThread::FileThread(QVector<QVector<orderDataForm>>* mainData, QVector<gridDa
 
 FileThread::~FileThread()
 {
-
 }
 
 
@@ -19,24 +18,24 @@ void FileThread::run()
     /* ... here is the expensive or blocking operation ... */
 
     QVector<orderDataForm> oneDayData;
-    for(qint32 i = 0;i<fileList.size()-1;++i){
+    for (qint32 i = 0; i < fileList.size() - 1; ++i) {
         QFile file(directory.filePath(fileList[i]));
 
-        if(i % 5 == 0){
+        if (i % dataPartsPerDay == 0) {
             oneDayData.clear();
         }
 
-        if(file.open(QIODevice::ReadOnly)){
-            qDebug()<<file<<'\n';
+        if (file.open(QIODevice::ReadOnly)) {
+            qDebug() << file << '\n';
             QTextStream stream(&file);
             quint16 lineNum = 0;
-            while(true){
+            while (true) {
                 QString line = stream.readLine();
-                if(!lineNum){
+                if (!lineNum) {
                     ++lineNum;
                     continue;
                 }
-                if(line.isEmpty()){
+                if (line.isEmpty()) {
                     break;
                 }
                 orderDataForm row(line.split(','));
@@ -44,25 +43,26 @@ void FileThread::run()
             }
         }
         file.close();
-        if(i % 5 == 4){
+        if (i % dataPartsPerDay == dataPartsPerDay - 1) {
+            std::sort(oneDayData.begin(), oneDayData.end(), timeLessThan);
             mData->append(oneDayData);
         }
         //qDebug()<<fileNum<<allFileNum;
         emit fileNumChanged(++fileNum);
     }
 
-    QFile file(directory.filePath(fileList[fileList.size()-1]));
-    if(file.open(QIODevice::ReadOnly)){
-        qDebug()<<file<<'\n';
+    QFile file(directory.filePath(fileList[fileList.size() - 1]));
+    if (file.open(QIODevice::ReadOnly)) {
+        qDebug() << file << '\n';
         QTextStream stream(&file);
         quint16 lineNum = 0;
-        while(true){
+        while (true) {
             QString line = stream.readLine();
-            if(!lineNum){
+            if (!lineNum) {
                 ++lineNum;
                 continue;
             }
-            if(line.isEmpty()){
+            if (line.isEmpty()) {
                 break;
             }
             gridDataForm row(line.split(','));

@@ -4,21 +4,26 @@
 #include <QString>
 #include <QStringList>
 
-class orderDataForm{
+class orderDataForm {
 public:
     orderDataForm(QStringList);
 
     QString order_id;
-    quint32 departure_time, end_time;
-    double orig_lng,orig_lat,dest_lng,dest_lat,fee;
+    quint32 departure_time, end_time, mid_time;
+    double orig_lng, orig_lat, dest_lng, dest_lat, fee;
+
+    //    void operator=(const orderDataForm& order);
 };
 
-class gridDataForm{
+class gridDataForm {
 public:
     gridDataForm(QStringList);
 
     quint16 grid_id;
-    double vertex0_lng,vertex0_lat,vertex1_lng,vertex1_lat,vertex2_lng,vertex2_lat,vertex3_lng,vertex3_lat;
+    double vertex0_lng, vertex0_lat, vertex1_lng, vertex1_lat, vertex2_lng, vertex2_lat, vertex3_lng, vertex3_lat;
 };
 
-#endif // DATAFORM_H
+bool timeLessThan(orderDataForm, orderDataForm);
+
+
+#endif// DATAFORM_H
