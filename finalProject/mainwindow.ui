@@ -377,7 +377,7 @@
             <item>
              <widget class="QPushButton" name="pushButton_2">
               <property name="text">
-               <string>PushButton</string>
+               <string>Spatio-temporal demand</string>
               </property>
              </widget>
             </item>

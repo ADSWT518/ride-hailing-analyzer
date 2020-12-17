@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "fileThread.h"
-#include "progressBarThread.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -50,9 +49,11 @@ void MainWindow::setupSignalSlots()
 
 void MainWindow::loadFile()
 {
-    FileThread* fileThread = new FileThread(&mainData, &gridData);
+    FileThread* fileThread = new FileThread(&mainData, &gridData, ui->UIprogressBar);
     connect(fileThread, &FileThread::resultReady, this, &MainWindow::handleFileResults);
     connect(fileThread, &FileThread::finished, fileThread, &QObject::deleteLater);
+    connect(fileThread, &FileThread::fileNumChanged,this, &MainWindow::setProgressBar);
+
     QString dirName = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
                                                         "../",
                                                         QFileDialog::ShowDirsOnly
@@ -64,20 +65,29 @@ void MainWindow::loadFile()
     nameFilters << "*.csv";
     QStringList fileList = dir.entryList(nameFilters, QDir::Files|QDir::Readable, QDir::Name);
     //qDebug() <<fileList;
-    allFileNum = fileList.count();
     fileThread->fileList = fileList;
     fileThread->directory = dir;
-    fileThread->start();
 
-    ProgressBarThread* progressBarThread = new ProgressBarThread(ui->UIprogressBar);
-    connect(progressBarThread, &ProgressBarThread::resultReady, this, &MainWindow::handlePBResults);
-    connect(progressBarThread, &ProgressBarThread::finished, progressBarThread, &QObject::deleteLater);
+    allFileNum = fileList.count();
     ui->UIprogressBar->setMinimum(0);
     ui->UIprogressBar->setMaximum(allFileNum);
-    progressBarThread->start();
+
+    fileThread->start();
+
+//    ProgressBarThread* progressBarThread = new ProgressBarThread(ui->UIprogressBar);
+//    connect(progressBarThread, &ProgressBarThread::resultReady, this, &MainWindow::handlePBResults);
+//    connect(progressBarThread, &ProgressBarThread::finished, progressBarThread, &QObject::deleteLater);
+
+//    progressBarThread->start();
 }
 
+void MainWindow::handleFileResults(){
+    qDebug()<<"Load successfully.";
+}
 
+void MainWindow::setProgressBar(quint16 fileNum){
+    ui->UIprogressBar->setValue(fileNum);
+}
 
 
 

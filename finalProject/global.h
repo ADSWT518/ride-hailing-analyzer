@@ -3,10 +3,7 @@
 
 #include <QtGlobal>
 
-
-quint16 fileNum = 0;
-quint16 allFileNum = 0;
-
-
+extern quint16 fileNum;
+extern quint16 allFileNum;
 
 #endif // GLOBAL_H

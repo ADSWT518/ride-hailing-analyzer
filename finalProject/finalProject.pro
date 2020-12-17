@@ -9,8 +9,9 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    ProgressBarThread.cpp \
+    dataForm.cpp \
     fileThread.cpp \
+    global.cpp \
     main.cpp \
     mainwindow.cpp
 
@@ -18,8 +19,7 @@ HEADERS += \
     dataForm.h \
     fileThread.h \
     global.h \
-    mainwindow.h \
-    progressBarThread.h
+    mainwindow.h
 
 FORMS += \
     mainwindow.ui

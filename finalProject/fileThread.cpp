@@ -1,9 +1,10 @@
 #include "fileThread.h"
 
-FileThread::FileThread(QVector<QVector<orderDataForm>>* mainData, QVector<gridDataForm>* gridData)
+FileThread::FileThread(QVector<QVector<orderDataForm>>* mainData, QVector<gridDataForm>* gridData, QProgressBar* QPB)
 {
     mData = mainData;
     gData = gridData;
+    PB = QPB;
 }
 
 FileThread::~FileThread()
@@ -46,7 +47,8 @@ void FileThread::run()
         if(i % 5 == 4){
             mData->append(oneDayData);
         }
-        ++fileNum;
+        //qDebug()<<fileNum<<allFileNum;
+        emit fileNumChanged(++fileNum);
     }
 
     QFile file(directory.filePath(fileList[fileList.size()-1]));
@@ -68,7 +70,7 @@ void FileThread::run()
         }
     }
     file.close();
-    ++fileNum;
+    emit fileNumChanged(++fileNum);
     //qDebug() <<mainData.size()<<mainData[0].size()<<mainData[0][0].size();
     //qDebug() <<gridData.size()<<gridData[0].size();
     emit resultReady(result);

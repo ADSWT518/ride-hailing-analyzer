@@ -8,17 +8,16 @@
 #include <QTextBrowser>
 #include <QDir>
 #include <QVector>
+#include <QProgressBar>
 #include "dataForm.h"
-
-extern quint16 fileNum;
-extern quint16 allFileNum;
+#include "global.h"
 
 class FileThread:public QThread
 {
     Q_OBJECT
 
 public:
-    FileThread(QVector<QVector<orderDataForm>>*, QVector<gridDataForm>*);
+    FileThread(QVector<QVector<orderDataForm>>*, QVector<gridDataForm>*, QProgressBar*);
     ~FileThread();
 
     void run() override;
@@ -28,11 +27,12 @@ public:
 
 signals:
     void resultReady(const QString &s);
-    void sendFileNum(quint16);
+    void fileNumChanged(quint16);
 
 private:
     QVector<QVector<orderDataForm>>* mData;
     QVector<gridDataForm>* gData;
+    QProgressBar* PB;
 };
 
 #endif // FILETHREAD_H

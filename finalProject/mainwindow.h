@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QDebug>
 #include "dataForm.h"
+#include "global.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -20,14 +21,10 @@ public:
 private slots:
     void loadFile();
     //void display();
-    void handleFileResults(){
-        qDebug()<<"Load successfully.";
-    }
-    void handlePBResults(){
+    void handleFileResults();
+    void setProgressBar(quint16);
 
-    }
-
-
+    void displaySEDemand();//display the spatio-temporal demand patterns.
 
 private:
     Ui::MainWindow *ui;
@@ -44,6 +41,9 @@ private:
 
     QVector<QVector<orderDataForm>> mainData;
     QVector<gridDataForm> gridData;
+
+
+
 
 };
 #endif // MAINWINDOW_H
