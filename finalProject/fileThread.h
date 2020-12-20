@@ -17,7 +17,7 @@ class FileThread : public QThread {
     Q_OBJECT
 
 public:
-    FileThread(QVector<QVector<orderDataForm>>*, QVector<gridDataForm>*, QProgressBar*);
+    FileThread(QVector<QVector<orderDataForm>>*, QVector<QVector<coordinate>>*);
     ~FileThread();
 
     void run() override;
@@ -30,9 +30,8 @@ signals:
     void fileNumChanged(quint16);
 
 private:
-    QVector<QVector<orderDataForm>>* mData;
-    QVector<gridDataForm>* gData;
-    QProgressBar* PB;
+    QVector<QVector<orderDataForm>>* mainData;
+    QVector<QVector<coordinate>>* gridData;
 };
 
 #endif// FILETHREAD_H

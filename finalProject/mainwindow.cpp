@@ -1,5 +1,7 @@
 #include "mainwindow.h"
+#include "countThread.h"
 #include "fileThread.h"
+#include "global.h"
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget* parent)
@@ -36,6 +38,20 @@ void MainWindow::setupUI()
 
     menuBar()->addMenu(loadMenu);
     menuBar()->addMenu(displayMenu);
+
+    chart = new QChart();
+
+    ui->timeStepSpinBox->setMinimum(1);
+    switch (ui->timeStepComboBox->currentIndex()) {
+        case 0:
+            ui->timeStepSpinBox->setMaximum(59);
+            break;
+        case 1:
+            ui->timeStepSpinBox->setMaximum(23);
+            break;
+        case 2:
+            ui->timeStepSpinBox->setMaximum(15);
+    }
 }
 
 void MainWindow::setupSignalSlots()
@@ -52,18 +68,34 @@ void MainWindow::setupSignalSlots()
 
     connect(ui->allGridRadioButton, &QRadioButton::clicked, this, &MainWindow::allGridsSelected);
     connect(ui->oneGridRadioButton, &QRadioButton::clicked, this, &MainWindow::oneGridSelected);
+
+    //TODO: debug
+    connect(ui->timeStepSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
+        [=](int i){
+        //timeStep = i * timeUnit[ui->timeStepComboBox->currentIndex()];
+        displaySTDemand();
+    });
+    connect(ui->timeStepComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
+        [=](int index){
+        displaySTDemand();
+    });
+    connect(ui->timeStepComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
+        [=](int index){
+        ui->timeStepSpinBox->setMaximum(timeUnitMax[index]);
+    });
+
 }
 
 void MainWindow::loadFile()
 {
-    FileThread* fileThread = new FileThread(&mainData, &gridData, ui->UIprogressBar);
+    FileThread* fileThread = new FileThread(&mainData, &gridData);
     connect(fileThread, &FileThread::resultReady, this, &MainWindow::handleFileResults);
     connect(fileThread, &FileThread::finished, fileThread, &QObject::deleteLater);
     connect(fileThread, &FileThread::fileNumChanged, this, &MainWindow::setProgressBar);
 
     QString dirName = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
                                                         "../",
-                                                        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+                                                        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks).toLatin1();
     //qDebug() <<dirName;
 
     if (dirName.isEmpty()) {
@@ -84,16 +116,11 @@ void MainWindow::loadFile()
 
     fileThread->start();
 
-    //    ProgressBarThread* progressBarThread = new ProgressBarThread(ui->UIprogressBar);
-    //    connect(progressBarThread, &ProgressBarThread::resultReady, this, &MainWindow::handlePBResults);
-    //    connect(progressBarThread, &ProgressBarThread::finished, progressBarThread, &QObject::deleteLater);
-
-    //    progressBarThread->start();
 }
 
-void MainWindow::handleFileResults()
+void MainWindow::handleFileResults(QString r)
 {
-    qDebug() << "Load successfully.";
+    qDebug() << r;
     fileLoaded = true;
 }
 
@@ -112,80 +139,24 @@ void MainWindow::oneGridSelected()
     oneGrids = true;
 }
 
-
-void MainWindow::displaySTDemand()
+void MainWindow::handleCountResults(QString r)
 {
-    if (!fileLoaded) {
-        QMessageBox::warning(this, "Warning!", "Please load file fist!");
-        return;
-    }
+    chart->removeAllSeries();
 
-    quint32 startTimeStamp = ui->startTimeEdit->dateTime().toSecsSinceEpoch();
-    quint32 endTimeStamp = ui->endTimeEdit->dateTime().toSecsSinceEpoch();
-    quint16 startDay = ui->startTimeEdit->date().day() - 1;
-    quint16 endDay = ui->endTimeEdit->date().day() - 1;
+    qDebug() <<"chart->series().size()"<<chart->series().size();
 
-    qDebug() << startTimeStamp << endTimeStamp << startDay << endDay;
-
-    quint32 timeStep = 0;
-    switch (ui->timeStepComboBox->currentIndex()) {
-        case 0:
-            timeStep = oneMinute;
-            break;
-        case 1:
-            timeStep = 10 * oneMinute;
-            break;
-        case 2:
-            timeStep = 30 * oneMinute;
-            break;
-        case 3:
-            timeStep = oneHour;
-            break;
-        case 4:
-            timeStep = 12 * oneHour;
-            break;
-        case 5:
-            timeStep = oneDay;
-    }
-
-    qDebug() << allGrids << oneGrids;
-
-    QChart* chart = new QChart();
     if (allGrids) {
         //All grids in Chengdu are selected.
         chart->setTitle("The number of orders in Chengdu over time");
         QLineSeries* orderNumSeries = new QLineSeries();
+        //orderNumSeries->clear();
 
-        quint32 startIndex = 0;
-        for (qint32 i = 0; i < mainData[startDay].size(); ++i) {
-            if (mainData[startDay][i].departure_time == startTimeStamp) {
-                startIndex = i;
-                break;
-            }
+        for (qint32 i = 0; i < orderCountVector.size();++i) {
+            orderNumSeries->append(startTimeStamp + timeStep * i, orderCountVector[i]);
+            //qDebug() <<'('<<startTimeStamp + timeStep * i<<','<< orderCountVector[i]<<')';
         }
-
-        //TODO: debug
-        quint32 orderCount = 0;
-        quint32 curTimeStamp = startTimeStamp;
-        quint16 curDay = startDay;
-        for (qint32 i = startIndex; mainData[curDay][i].departure_time <= endTimeStamp; ++i) {
-            //qDebug() <<i;
-            if (mainData[curDay][i].mid_time < curTimeStamp + timeStep) {
-                ++orderCount;
-            } else {
-                qDebug() << orderCount;
-                orderNumSeries->append(curTimeStamp, orderCount);
-                curTimeStamp += timeStep;
-                orderCount = 0;
-            }
-
-            if (i == mainData[curDay].size() - 1) {
-                ++curDay;
-                i = -1;
-            }
-        }
-
         chart->addSeries(orderNumSeries);
+        qDebug() <<"chart->series().size()"<<chart->series().size();
 
         chart->createDefaultAxes();
 
@@ -198,6 +169,41 @@ void MainWindow::displaySTDemand()
     } else {
         qDebug() << "Please select grid area.";
     }
+
+    qDebug() <<r;
+}
+
+
+void MainWindow::reloadChart()
+{
+}
+
+void MainWindow::displaySTDemand()
+{
+    if (!fileLoaded) {
+        QMessageBox::warning(this, "Warning!", "Please load file fist!");
+        return;
+    }
+
+    CountThread* countThread = new CountThread(&mainData);
+    connect(countThread, &CountThread::resultReady, this, &MainWindow::handleCountResults);
+    connect(countThread, &CountThread::finished, countThread, &QObject::deleteLater);
+
+
+
+    startTimeStamp = ui->startTimeEdit->dateTime().toSecsSinceEpoch();
+    endTimeStamp = ui->endTimeEdit->dateTime().toSecsSinceEpoch();
+    startDay = ui->startTimeEdit->date().day() - 1;
+    endDay = ui->endTimeEdit->date().day() - 1;
+
+    qDebug() << startTimeStamp << endTimeStamp << startDay << endDay;
+
+    timeStep = ui->timeStepSpinBox->value() * timeUnit[ui->timeStepComboBox->currentIndex()];
+
+    qDebug() << allGrids << oneGrids;
+
+    countThread->start();
+
 }
 
 void MainWindow::displayTravelTime()

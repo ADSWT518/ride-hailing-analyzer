@@ -4,13 +4,24 @@
 #include <QString>
 #include <QStringList>
 
+class coordinate {
+public:
+    coordinate(double, double);
+    coordinate();
+
+    coordinate& operator=(const coordinate& co);
+
+    double lng, lat;
+};
+
 class orderDataForm {
 public:
     orderDataForm(QStringList);
 
     QString order_id;
-    quint32 departure_time, end_time, mid_time;
-    double orig_lng, orig_lat, dest_lng, dest_lat, fee;
+    quint32 departure_time, end_time;
+    coordinate orig, dest;
+    double fee;
 
     //    void operator=(const orderDataForm& order);
 };
@@ -20,7 +31,8 @@ public:
     gridDataForm(QStringList);
 
     quint16 grid_id;
-    double vertex0_lng, vertex0_lat, vertex1_lng, vertex1_lat, vertex2_lng, vertex2_lat, vertex3_lng, vertex3_lat;
+
+    coordinate vertex0, vertex1, vertex2, vertex3;
 };
 
 bool timeLessThan(orderDataForm, orderDataForm);

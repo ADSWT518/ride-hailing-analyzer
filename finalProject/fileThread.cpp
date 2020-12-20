@@ -1,10 +1,9 @@
 #include "fileThread.h"
 
-FileThread::FileThread(QVector<QVector<orderDataForm>>* mainData, QVector<gridDataForm>* gridData, QProgressBar* QPB)
+FileThread::FileThread(QVector<QVector<orderDataForm>>* mData, QVector<QVector<coordinate>>* gData)
 {
-    mData = mainData;
-    gData = gridData;
-    PB = QPB;
+    mainData = mData;
+    gridData = gData;
 }
 
 FileThread::~FileThread()
@@ -14,12 +13,11 @@ FileThread::~FileThread()
 
 void FileThread::run()
 {
-    QString result;
     /* ... here is the expensive or blocking operation ... */
 
     QVector<orderDataForm> oneDayData;
     for (qint32 i = 0; i < fileList.size() - 1; ++i) {
-        QFile file(directory.filePath(fileList[i]));
+        QFile file(directory.filePath(fileList[i].toLatin1()));
 
         if (i % dataPartsPerDay == 0) {
             oneDayData.clear();
@@ -45,7 +43,7 @@ void FileThread::run()
         file.close();
         if (i % dataPartsPerDay == dataPartsPerDay - 1) {
             std::sort(oneDayData.begin(), oneDayData.end(), timeLessThan);
-            mData->append(oneDayData);
+            mainData->append(oneDayData);
         }
         //qDebug()<<fileNum<<allFileNum;
         emit fileNumChanged(++fileNum);
@@ -56,6 +54,9 @@ void FileThread::run()
         qDebug() << file << '\n';
         QTextStream stream(&file);
         quint16 lineNum = 0;
+        QVector<coordinate> row;
+        QVector<coordinate> row1;
+
         while (true) {
             QString line = stream.readLine();
             if (!lineNum) {
@@ -65,13 +66,34 @@ void FileThread::run()
             if (line.isEmpty()) {
                 break;
             }
-            gridDataForm row(line.split(','));
-            gData->append(row);
+
+            quint16 grid_id = line.split(',')[0].trimmed().toUInt();
+            coordinate v0(line.split(',')[1].trimmed().toDouble(), line.split(',')[2].trimmed().toDouble());
+            coordinate v1(line.split(',')[3].trimmed().toDouble(), line.split(',')[4].trimmed().toDouble());
+            coordinate v2(line.split(',')[5].trimmed().toDouble(), line.split(',')[6].trimmed().toDouble());
+            coordinate v3(line.split(',')[7].trimmed().toDouble(), line.split(',')[8].trimmed().toDouble());
+            if (grid_id < 90) {
+                row.append(v0);
+                if (grid_id % 10 == 9) {
+                    row.append(v1);
+                    gridData->append(row);
+                    row.clear();
+                }
+            } else {
+                row.append(v0);
+                row1.append(v3);
+                if (grid_id % 10 == 9) {
+                    row.append(v1);
+                    row1.append(v2);
+                    gridData->append(row);
+                    gridData->append(row1);
+                }
+            }
         }
     }
     file.close();
     emit fileNumChanged(++fileNum);
     //qDebug() <<mainData.size()<<mainData[0].size()<<mainData[0][0].size();
     //qDebug() <<gridData.size()<<gridData[0].size();
-    emit resultReady(result);
+    emit resultReady("Load successfully.");
 }

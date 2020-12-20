@@ -5,6 +5,7 @@
 #include "global.h"
 #include <QDebug>
 #include <QMainWindow>
+#include <QtCharts>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -22,7 +23,7 @@ public:
 private slots:
     void loadFile();
     //void display();
-    void handleFileResults();
+    void handleFileResults(QString);
     void setProgressBar(quint16);
 
     void displaySTDemand();//display the spatio-temporal demand patterns.
@@ -31,6 +32,10 @@ private slots:
 
     void allGridsSelected();
     void oneGridSelected();
+
+    void handleCountResults(QString);
+
+    void reloadChart();
 
 private:
     Ui::MainWindow* ui;
@@ -45,12 +50,13 @@ private:
     QAction* displayTravelTimeAction;
     QAction* displayOrderFeesAction;
 
+    QChart* chart;
+
     QVector<QVector<orderDataForm>> mainData;
-    QVector<gridDataForm> gridData;
+    QVector<QVector<coordinate>> gridData;
+
+    quint32 allFileNum = 0;//allFileNum只会在main thread用到，所以定义为数据成员
 
     bool fileLoaded = 0;
-    bool allGrids = 0;
-    bool oneGrids = 0;
-
 };
 #endif// MAINWINDOW_H
