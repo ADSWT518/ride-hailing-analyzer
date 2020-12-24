@@ -35,14 +35,14 @@ orderDataForm::orderDataForm(QStringList lst):
 //}
 
 
-gridDataForm::gridDataForm(QStringList lst):
-    vertex0(lst[1].trimmed().toDouble(), lst[2].trimmed().toDouble()),
-    vertex1(lst[3].trimmed().toDouble(), lst[4].trimmed().toDouble()),
-    vertex2(lst[5].trimmed().toDouble(), lst[6].trimmed().toDouble()),
-    vertex3(lst[7].trimmed().toDouble(), lst[8].trimmed().toDouble())
-{
-    grid_id = lst[0].trimmed().toUInt();
-}
+//gridDataForm::gridDataForm(QStringList lst):
+//    vertex0(lst[1].trimmed().toDouble(), lst[2].trimmed().toDouble()),
+//    vertex1(lst[3].trimmed().toDouble(), lst[4].trimmed().toDouble()),
+//    vertex2(lst[5].trimmed().toDouble(), lst[6].trimmed().toDouble()),
+//    vertex3(lst[7].trimmed().toDouble(), lst[8].trimmed().toDouble())
+//{
+//    grid_id = lst[0].trimmed().toUInt();
+//}
 
 bool timeLessThan(orderDataForm order1, orderDataForm order2)
 {

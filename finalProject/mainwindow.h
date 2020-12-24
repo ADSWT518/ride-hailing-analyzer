@@ -41,6 +41,7 @@ private:
     Ui::MainWindow* ui;
     void setupUI();
     void setupSignalSlots();
+    void Lagrange_interpolation(QVector<qint32>&, QVector<qint64>&);
 
     QMenu* loadMenu;
     QMenu* displayMenu;
@@ -51,6 +52,8 @@ private:
     QAction* displayOrderFeesAction;
 
     QChart* chart;
+    QDateTimeAxis* axisX = new QDateTimeAxis;
+    QValueAxis* axisY = new QValueAxis;
 
     QVector<QVector<orderDataForm>> mainData;
     QVector<QVector<coordinate>> gridData;
@@ -58,5 +61,6 @@ private:
     quint32 allFileNum = 0;//allFileNum只会在main thread用到，所以定义为数据成员
 
     bool fileLoaded = 0;
+    bool displayButtonClicked = 0;
 };
 #endif// MAINWINDOW_H

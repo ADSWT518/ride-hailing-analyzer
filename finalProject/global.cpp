@@ -15,7 +15,10 @@ const quint32 timeUnit[3] = {60, 3600, 86400};
 const quint16 timeUnitMax[3] = {59, 23, 15};
 
 quint32 orderCount = 0;
-QVector<quint32> orderCountVector;
+QVector<qint32> orderCountVector;
 
 bool allGrids = 0;
-bool oneGrids = 0;
+bool oneGrid = 0;
+
+quint16 rowNum = 0;
+quint16 colNum = 0;

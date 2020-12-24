@@ -55,4 +55,23 @@ meet Dr. Ling in office hour
 **TODO:**
 
 - [ ] 快速改变`QSpinBox`的值的时候，图像会出现问题。原因应该是我不知道怎么在开启下一个线程时，结束之前的线程。
-- [ ] 开始做按照grid的绘图
+- [x] 开始做按照grid的绘图
+
+### 12.23
+
+- [x] 改变`timeStep`之后，统计得到的`sum of orderCountVector`怎么也变了orz
+
+### 12.24
+
+* finish display of data in each grid!!!
+
+**TODO:**
+
+- [ ] 在拉格朗日插值里面，为啥把数组`timeVector`的类型设为`qint32`就不对，设置成`qint64`就对了。。。
+
+- [ ] ```
+  如果最后一组数据在达到timeStep之前就超过了endTimeStamp，那么舍弃它
+  ```
+
+  感觉不能用这个规则，不然有时候舍弃的太多了
+

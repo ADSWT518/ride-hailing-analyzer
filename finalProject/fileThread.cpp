@@ -24,7 +24,7 @@ void FileThread::run()
         }
 
         if (file.open(QIODevice::ReadOnly)) {
-            qDebug() << file << '\n';
+            //qDebug() << file << '\n';
             QTextStream stream(&file);
             quint16 lineNum = 0;
             while (true) {
@@ -72,21 +72,15 @@ void FileThread::run()
             coordinate v1(line.split(',')[3].trimmed().toDouble(), line.split(',')[4].trimmed().toDouble());
             coordinate v2(line.split(',')[5].trimmed().toDouble(), line.split(',')[6].trimmed().toDouble());
             coordinate v3(line.split(',')[7].trimmed().toDouble(), line.split(',')[8].trimmed().toDouble());
-            if (grid_id < 90) {
-                row.append(v0);
+
+            gridData->operator[](10 - grid_id / 10)[grid_id % 10] = v3;
+            if (grid_id % 10 == 9) {
+                gridData->operator[](10 - grid_id / 10)[10] = v2;
+            }
+            if (grid_id >= 90) {
+                gridData->operator[](0)[grid_id % 10] = v0;
                 if (grid_id % 10 == 9) {
-                    row.append(v1);
-                    gridData->append(row);
-                    row.clear();
-                }
-            } else {
-                row.append(v0);
-                row1.append(v3);
-                if (grid_id % 10 == 9) {
-                    row.append(v1);
-                    row1.append(v2);
-                    gridData->append(row);
-                    gridData->append(row1);
+                    gridData->operator[](0)[10] = v1;
                 }
             }
         }

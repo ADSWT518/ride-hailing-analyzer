@@ -26,14 +26,14 @@ public:
     //    void operator=(const orderDataForm& order);
 };
 
-class gridDataForm {
-public:
-    gridDataForm(QStringList);
+//class gridDataForm {
+//public:
+//    gridDataForm(QStringList);
 
-    quint16 grid_id;
+//    quint16 grid_id;
 
-    coordinate vertex0, vertex1, vertex2, vertex3;
-};
+//    coordinate vertex0, vertex1, vertex2, vertex3;
+//};
 
 bool timeLessThan(orderDataForm, orderDataForm);
 
