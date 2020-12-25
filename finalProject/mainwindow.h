@@ -32,6 +32,14 @@ private slots:
     void displayTravelTime();
     void displayOrderFees();
 
+    void orderIDChanged(quint32);
+    void depTimechanged(quint32);
+    void endTimeChanged(quint32);
+    void origChanged(quint32);
+    void destChanged(quint32);
+    void feeChanged(quint32);
+
+
     void allGridsSelected();
     void oneGridSelected();
 

@@ -74,6 +74,14 @@ void MainWindow::setupSignalSlots()
     connect(displayOrderFeesAction, &QAction::triggered, this, &MainWindow::displayOrderFees);
     connect(ui->orderFeesButton, &QPushButton::clicked, this, &MainWindow::displayOrderFees);
 
+    connect(ui->orderIDBox, &QCheckBox::stateChanged, this, &MainWindow::orderIDChanged);
+    connect(ui->depTimeBox, &QCheckBox::stateChanged, this, &MainWindow::depTimechanged);
+    connect(ui->endTimeBox, &QCheckBox::stateChanged, this, &MainWindow::endTimeChanged);
+    connect(ui->origBox, &QCheckBox::stateChanged, this, &MainWindow::origChanged);
+    connect(ui->destBox, &QCheckBox::stateChanged, this, &MainWindow::destChanged);
+    connect(ui->feeBox, &QCheckBox::stateChanged, this, &MainWindow::feeChanged);
+
+
     connect(ui->allGridRadioButton, &QRadioButton::clicked, this, &MainWindow::allGridsSelected);
     connect(ui->oneGridRadioButton, &QRadioButton::clicked, this, &MainWindow::oneGridSelected);
     connect(ui->allGridRadioButton, &QRadioButton::clicked, ui->rowSpinBox, &QWidget::setDisabled);
@@ -172,18 +180,47 @@ void MainWindow::handleFileResults(QString r)
     qDebug() << r;
     fileLoaded = true;
 
-//    for (int i = 0; i < gridData.size(); ++i) {
-//        for (int j = 0; j < gridData.at(0).size(); ++j) {
-//            std::cout << '(' << gridData[i][j].lng << ',' << gridData[i][j].lat << ')';
-//        }
-//        std::cout << '\n';
-//    }
+    //    for (int i = 0; i < gridData.size(); ++i) {
+    //        for (int j = 0; j < gridData.at(0).size(); ++j) {
+    //            std::cout << '(' << gridData[i][j].lng << ',' << gridData[i][j].lat << ')';
+    //        }
+    //        std::cout << '\n';
+    //    }
 }
 
 void MainWindow::setProgressBar(quint16 fileNum)
 {
     ui->UIprogressBar->setValue(fileNum);
 }
+
+
+void MainWindow::orderIDChanged(quint32 state)
+{
+    order_id = state;
+}
+void MainWindow::depTimechanged(quint32 state)
+{
+    departure_time = state;
+}
+void MainWindow::endTimeChanged(quint32 state)
+{
+    end_time = state;
+}
+void MainWindow::origChanged(quint32 state)
+{
+    orig = state;
+    qDebug() << "orig:" << orig;
+}
+void MainWindow::destChanged(quint32 state)
+{
+    dest = state;
+    qDebug() << "dest:" << dest;
+}
+void MainWindow::feeChanged(quint32 state)
+{
+    fee = state;
+}
+
 
 void MainWindow::allGridsSelected()
 {
@@ -279,9 +316,9 @@ void MainWindow::handleTimeCountResults(QString r)
     qDebug() << r;
 
     //if (displaySTButtonClicked) {
-        chart->removeAllSeries();
-        chart->removeAxis(axisX);
-        chart->removeAxis(axisY);
+    chart->removeAllSeries();
+    chart->removeAxis(axisX);
+    chart->removeAxis(axisY);
     //}
 
     if (allGrids) {
@@ -314,14 +351,14 @@ void MainWindow::handleTimeCountResults(QString r)
 
 void MainWindow::handleFeesCountResults(QString r)
 {
-    qDebug() <<r;
+    qDebug() << r;
 
     qDebug() << r;
 
     //if (displaySTButtonClicked) {
-        chart->removeAllSeries();
-        chart->removeAxis(axisX);
-        chart->removeAxis(axisY);
+    chart->removeAllSeries();
+    chart->removeAxis(axisX);
+    chart->removeAxis(axisY);
     //}
 
     if (allGrids) {
@@ -351,7 +388,6 @@ void MainWindow::handleFeesCountResults(QString r)
 
 
     ui->graphicsView->setChart(chart);
-
 }
 
 void MainWindow::displaySTDemand()

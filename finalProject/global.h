@@ -23,6 +23,13 @@ extern QVector<qint64> orderCountVector;
 extern QVector<qint32> travelTimeCountVector;
 extern QVector<qint32> feesCountVector;
 
+extern bool order_id;
+extern bool departure_time;
+extern bool end_time;
+extern bool orig;
+extern bool dest;
+extern bool fee;
+
 extern bool allGrids;
 extern bool oneGrid;
 

@@ -17,9 +17,16 @@ const quint16 timeUnitMax[3] = {59, 23, 15};
 quint32 orderCount = 0;
 QVector<qint64> orderCountVector;
 QVector<qint32> travelTimeCountVector(5);
-//(0,10] (10, 30], (30, 60], (60, 120], (120, +∞)
+//(0,15] (15, 30], (30, 45], (45, 90], (90, +∞)
 QVector<qint32> feesCountVector(5);
-//(0,10] (10, 25], (25, 50], (50, 100], (100, +∞)
+//(0,5] (5, 10], (10, 20], (20, 30], (30, +∞)
+
+bool order_id = 0;
+bool departure_time = 0;
+bool end_time = 0;
+bool orig = 0;
+bool dest = 0;
+bool fee = 0;
 
 bool allGrids = 0;
 bool oneGrid = 0;

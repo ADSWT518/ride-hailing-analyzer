@@ -26,9 +26,6 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_3">
-    <item row="0" column="1">
-     <widget class="QChartView" name="graphicsView"/>
-    </item>
     <item row="0" column="0">
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
@@ -59,56 +56,6 @@
       </item>
       <item>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="1" column="1">
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item>
-           <widget class="QLabel" name="label_3">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="font">
-             <font>
-              <family>Consolas</family>
-              <pointsize>10</pointsize>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Choose what to display</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QVBoxLayout" name="verticalLayout_2">
-            <item>
-             <widget class="QPushButton" name="STDemandButton">
-              <property name="text">
-               <string>Spatio-temporal demand</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="travelTimeButton">
-              <property name="text">
-               <string>Travel time</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="orderFeesButton">
-              <property name="text">
-               <string>Order fees</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </item>
         <item row="1" column="0">
          <layout class="QVBoxLayout" name="verticalLayout_9">
           <item>
@@ -215,6 +162,148 @@
                </layout>
               </item>
              </layout>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="1">
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="font">
+             <font>
+              <family>Consolas</family>
+              <pointsize>10</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Choose what to display</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QPushButton" name="STDemandButton">
+              <property name="text">
+               <string>Spatio-temporal demand</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="travelTimeButton">
+              <property name="text">
+               <string>Travel time</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="orderFeesButton">
+              <property name="text">
+               <string>Order fees</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="0">
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="font">
+             <font>
+              <family>Consolas</family>
+              <pointsize>10</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Choose data fields</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <item row="0" column="0">
+             <widget class="QCheckBox" name="orderIDBox">
+              <property name="text">
+               <string>order_id</string>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">buttonGroup_2</string>
+              </attribute>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QCheckBox" name="endTimeBox">
+              <property name="text">
+               <string>end_time</string>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">buttonGroup_2</string>
+              </attribute>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QCheckBox" name="depTimeBox">
+              <property name="text">
+               <string>departure_time</string>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">buttonGroup_2</string>
+              </attribute>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QCheckBox" name="feeBox">
+              <property name="text">
+               <string>fee</string>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">buttonGroup_2</string>
+              </attribute>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QCheckBox" name="origBox">
+              <property name="text">
+               <string>orig</string>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">buttonGroup_2</string>
+              </attribute>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QCheckBox" name="destBox">
+              <property name="text">
+               <string>dest</string>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">buttonGroup_2</string>
+              </attribute>
+             </widget>
             </item>
            </layout>
           </item>
@@ -393,121 +482,12 @@
           </item>
          </layout>
         </item>
-        <item row="0" column="0">
-         <layout class="QVBoxLayout" name="verticalLayout_7">
-          <property name="spacing">
-           <number>6</number>
-          </property>
-          <item>
-           <widget class="QLabel" name="label">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="font">
-             <font>
-              <family>Consolas</family>
-              <pointsize>10</pointsize>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Choose data fields</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QGridLayout" name="gridLayout_2">
-            <item row="1" column="0">
-             <widget class="QCheckBox" name="depTimeBox">
-              <property name="text">
-               <string>departure_time</string>
-              </property>
-              <attribute name="buttonGroup">
-               <string notr="true">buttonGroup_2</string>
-              </attribute>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QCheckBox" name="origLngBox">
-              <property name="text">
-               <string>orig_lng</string>
-              </property>
-              <attribute name="buttonGroup">
-               <string notr="true">buttonGroup_2</string>
-              </attribute>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QCheckBox" name="destLngBox">
-              <property name="text">
-               <string>dest_lng</string>
-              </property>
-              <attribute name="buttonGroup">
-               <string notr="true">buttonGroup_2</string>
-              </attribute>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QCheckBox" name="orderIDBox">
-              <property name="text">
-               <string>order_id</string>
-              </property>
-              <attribute name="buttonGroup">
-               <string notr="true">buttonGroup_2</string>
-              </attribute>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QCheckBox" name="destLatBox">
-              <property name="text">
-               <string>dest_lat</string>
-              </property>
-              <attribute name="buttonGroup">
-               <string notr="true">buttonGroup_2</string>
-              </attribute>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QCheckBox" name="endTimeBox">
-              <property name="text">
-               <string>end_time</string>
-              </property>
-              <attribute name="buttonGroup">
-               <string notr="true">buttonGroup_2</string>
-              </attribute>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QCheckBox" name="origLatBox">
-              <property name="text">
-               <string>orig_lat</string>
-              </property>
-              <attribute name="buttonGroup">
-               <string notr="true">buttonGroup_2</string>
-              </attribute>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QCheckBox" name="feeBox">
-              <property name="text">
-               <string>fee</string>
-              </property>
-              <attribute name="buttonGroup">
-               <string notr="true">buttonGroup_2</string>
-              </attribute>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </item>
        </layout>
       </item>
      </layout>
+    </item>
+    <item row="0" column="1">
+     <widget class="QChartView" name="graphicsView"/>
     </item>
    </layout>
   </widget>
@@ -533,7 +513,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>
