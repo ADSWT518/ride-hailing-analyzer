@@ -200,7 +200,7 @@ void CountThread::run()
 
             //TODO: debug
 
-            quint32 curTimeStamp = startTimeStamp;
+            //quint32 curTimeStamp = startTimeStamp;
 
             qDebug() << "timeStep: " << timeStep << "startIndex: " << startIndex;
 
@@ -214,13 +214,14 @@ void CountThread::run()
 
                 //如果最后一组数据在达到timeStep之前就超过了endTimeStamp，那么舍弃它
                 double t = mainData->at(curDay)[i].fee;
-                if (t <= 10) {
+                //qDebug() <<t;
+                if (t <= 5) {
                     ++feesCountVector[0];
-                } else if (t <= 25) {
+                } else if (t <= 10) {
                     ++feesCountVector[1];
-                } else if (t <= 50) {
+                } else if (t <= 20) {
                     ++feesCountVector[2];
-                } else if (t <= 100) {
+                } else if (t <= 30) {
                     ++feesCountVector[3];
                 } else {
                     ++feesCountVector[4];
@@ -247,13 +248,13 @@ void CountThread::run()
                 double t = mainData->at(curDay)[i].fee;
 
                 if (isInGrid(mainData->at(curDay)[i].orig, *gridData, rowNum, colNum)) {
-                    if (t <= 10) {
+                    if (t <= 5) {
                         ++feesCountVector[0];
-                    } else if (t <= 25) {
+                    } else if (t <= 10) {
                         ++feesCountVector[1];
-                    } else if (t <= 50) {
+                    } else if (t <= 20) {
                         ++feesCountVector[2];
-                    } else if (t <= 100) {
+                    } else if (t <= 30) {
                         ++feesCountVector[3];
                     } else {
                         ++feesCountVector[4];
@@ -271,7 +272,7 @@ void CountThread::run()
             }
         }
 
-        qDebug() << travelTimeCountVector;
+        qDebug() << feesCountVector;
     } else {
         qDebug() << "No button is clicked!";
     }

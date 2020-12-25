@@ -326,23 +326,23 @@ void MainWindow::handleFeesCountResults(QString r)
 
     if (allGrids) {
         //All grids in Chengdu are selected.
-        chart->setTitle("The number of orders in Chengdu over time");
+        chart->setTitle("Order fees in Chengdu during this time");
     } else if (oneGrid) {
         //Only one grid is selected.
-        chart->setTitle("The number of orders in one grid over time");
+        chart->setTitle("Order fees in one grid during this time");
     } else {
         qDebug() << "Please select grid area.";
     }
 
     QPieSeries* travelTimeSeries = new QPieSeries();
     //orderNumSeries->clea
-    chart->setTitle("Travel Time");
 
-    travelTimeSeries->append("0-10￥", travelTimeCountVector[0]);
-    travelTimeSeries->append("10-25￥", travelTimeCountVector[1]);
-    travelTimeSeries->append("25-50￥", travelTimeCountVector[2]);
-    travelTimeSeries->append("50-100￥", travelTimeCountVector[3]);
-    travelTimeSeries->append(">100￥", travelTimeCountVector[4]);
+
+    travelTimeSeries->append("0-5￥", feesCountVector[0]);
+    travelTimeSeries->append("5-10￥", feesCountVector[1]);
+    travelTimeSeries->append("10-20￥", feesCountVector[2]);
+    travelTimeSeries->append("20-30￥", feesCountVector[3]);
+    travelTimeSeries->append(">30￥", feesCountVector[4]);
 
     travelTimeSeries->setLabelsVisible(true);
     travelTimeSeries->setUseOpenGL(true);
