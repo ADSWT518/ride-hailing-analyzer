@@ -16,7 +16,6 @@ public:
 
 signals:
     void resultReady(const QString& s);
-    void orderCountRefresh();
 
 private:
     QVector<QVector<orderDataForm>>* mainData;

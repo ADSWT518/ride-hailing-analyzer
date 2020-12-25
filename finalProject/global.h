@@ -5,7 +5,7 @@
 #include <QVector>
 
 #define dataPartsPerDay 5
-#define minPointNumInChart 10
+#define minPointNumInChart 8
 
 extern quint32 startTimeStamp;
 extern quint32 endTimeStamp;
@@ -19,12 +19,18 @@ extern const quint32 timeUnit[3];
 extern const quint16 timeUnitMax[3];
 
 extern quint32 orderCount;
-extern QVector<qint32> orderCountVector;
+extern QVector<qint64> orderCountVector;
+extern QVector<qint32> travelTimeCountVector;
+extern QVector<qint32> feesCountVector;
 
 extern bool allGrids;
 extern bool oneGrid;
 
 extern quint16 rowNum;
 extern quint16 colNum;
+
+extern bool displaySTButtonClicked;
+extern bool displayTimeButtonClicked;
+extern bool displayFeesButtonClicked;
 
 #endif// GLOBAL_H

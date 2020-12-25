@@ -7,6 +7,8 @@
 #include <QMainWindow>
 #include <QtCharts>
 
+QT_CHARTS_USE_NAMESPACE
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
     class MainWindow;
@@ -33,15 +35,16 @@ private slots:
     void allGridsSelected();
     void oneGridSelected();
 
-    void handleCountResults(QString);
-
-    void reloadChart();
+    void handleSTCountResults(QString);
+    void handleTimeCountResults(QString);
+    void handleFeesCountResults(QString);
+    //void reloadChart();
 
 private:
     Ui::MainWindow* ui;
     void setupUI();
     void setupSignalSlots();
-    void Lagrange_interpolation(QVector<qint32>&, QVector<qint64>&);
+    void Lagrange_interpolation(QVector<qint64>&, QVector<qint64>&, quint32);
 
     QMenu* loadMenu;
     QMenu* displayMenu;
@@ -61,6 +64,7 @@ private:
     quint32 allFileNum = 0;//allFileNum只会在main thread用到，所以定义为数据成员
 
     bool fileLoaded = 0;
-    bool displayButtonClicked = 0;
+
+
 };
 #endif// MAINWINDOW_H

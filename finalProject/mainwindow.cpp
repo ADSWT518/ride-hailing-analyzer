@@ -88,13 +88,13 @@ void MainWindow::setupSignalSlots()
     //TODO: debug
     connect(ui->timeStepSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
             [=](int i) {
-                if (displayButtonClicked) {
+                if (displaySTButtonClicked || displayTimeButtonClicked || displayFeesButtonClicked) {
                     displaySTDemand();
                 }
             });
     connect(ui->timeStepComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
             [=](int index) {
-                if (displayButtonClicked) {
+                if (displaySTButtonClicked || displayTimeButtonClicked || displayFeesButtonClicked) {
                     displaySTDemand();
                 }
             });
@@ -104,7 +104,7 @@ void MainWindow::setupSignalSlots()
             });
 }
 
-void MainWindow::Lagrange_interpolation(QVector<qint32>& ocVector, QVector<qint64>& tVector)
+void MainWindow::Lagrange_interpolation(QVector<qint64>& ocVector, QVector<qint64>& tVector, quint32 tStep)
 {
     quint32 size = ocVector.size();
 
@@ -115,22 +115,22 @@ void MainWindow::Lagrange_interpolation(QVector<qint32>& ocVector, QVector<qint6
             for (quint32 k = 0; k < size; k++) {
                 if (k == j)
                     continue;
-                up *= (startTimeStamp + timeStep * i + timeStep / 2) - tVector[k];
+                up *= (startTimeStamp + tStep * i + tStep / 2) - tVector[k];
                 down *= tVector[j] - tVector[k];
             }
             res += ocVector[j] * up / down;
-            qDebug() << up << down;
+            //qDebug() << up << down;
         }
         qDebug() << res;
-        ocVector.append(res);
-        tVector.append(startTimeStamp + timeStep * i + timeStep / 2);
+        ocVector.insert(ocVector.begin() + (2 * i + 1), res);
+        tVector.append(startTimeStamp + tStep * i + tStep / 2);
     }
 
-    std::sort(ocVector.begin(), ocVector.end());
+    //    std::sort(ocVector.begin(), ocVector.end());
     std::sort(tVector.begin(), tVector.end());
 
-    qDebug() << "ocVector:" << ocVector;
-    qDebug() << "tVecotr:" << tVector;
+    //    qDebug() << "ocVector:" << ocVector;
+    //    qDebug() << "tVecotr:" << tVector;
     qDebug() << "Lagrange!";
 }
 
@@ -172,12 +172,12 @@ void MainWindow::handleFileResults(QString r)
     qDebug() << r;
     fileLoaded = true;
 
-    for (int i = 0; i < gridData.size(); ++i) {
-        for (int j = 0; j < gridData.at(0).size(); ++j) {
-            std::cout << '(' << gridData[i][j].lng << ',' << gridData[i][j].lat << ')';
-        }
-        std::cout << '\n';
-    }
+//    for (int i = 0; i < gridData.size(); ++i) {
+//        for (int j = 0; j < gridData.at(0).size(); ++j) {
+//            std::cout << '(' << gridData[i][j].lng << ',' << gridData[i][j].lat << ')';
+//        }
+//        std::cout << '\n';
+//    }
 }
 
 void MainWindow::setProgressBar(quint16 fileNum)
@@ -197,11 +197,11 @@ void MainWindow::oneGridSelected()
     allGrids = false;
 }
 
-void MainWindow::handleCountResults(QString r)
+void MainWindow::handleSTCountResults(QString r)
 {
     qDebug() << r;
 
-    if (displayButtonClicked) {
+    if (displaySTButtonClicked) {
         chart->removeAllSeries();
         chart->removeAxis(axisX);
         chart->removeAxis(axisY);
@@ -230,10 +230,16 @@ void MainWindow::handleCountResults(QString r)
         timeVector.push_back(startTimeStamp + timeStep * i);
     }
 
+    quint32 tStep = timeStep;
     while (orderCountVector.size() <= minPointNumInChart) {
         //when only a few data points are selected, use interpolation
-        Lagrange_interpolation(orderCountVector, timeVector);
+        Lagrange_interpolation(orderCountVector, timeVector, tStep);
+        tStep /= 2;
     }
+
+    //qDebug() << "orderCountVector:" << orderCountVector;
+    //qDebug() << "timeVector:" << timeVector;
+
     qDebug() << orderCountVector.size() << timeVector.size();
     for (qint32 i = 0; i < orderCountVector.size(); ++i) {
         QDateTime dt;
@@ -268,9 +274,84 @@ void MainWindow::handleCountResults(QString r)
     ui->graphicsView->setChart(chart);
 }
 
-
-void MainWindow::reloadChart()
+void MainWindow::handleTimeCountResults(QString r)
 {
+    qDebug() << r;
+
+    //if (displaySTButtonClicked) {
+        chart->removeAllSeries();
+        chart->removeAxis(axisX);
+        chart->removeAxis(axisY);
+    //}
+
+    if (allGrids) {
+        //All grids in Chengdu are selected.
+        chart->setTitle("Travel time in Chengdu");
+    } else if (oneGrid) {
+        //Only one grid is selected.
+        chart->setTitle("Travel time in one grid");
+    } else {
+        qDebug() << "Please select grid area.";
+    }
+
+    QPieSeries* travelTimeSeries = new QPieSeries();
+    //orderNumSeries->clea
+
+    travelTimeSeries->append("0-15min", travelTimeCountVector[0]);
+    travelTimeSeries->append("15-30min", travelTimeCountVector[1]);
+    travelTimeSeries->append("30-45min", travelTimeCountVector[2]);
+    travelTimeSeries->append("45-90min", travelTimeCountVector[3]);
+    travelTimeSeries->append(">90min", travelTimeCountVector[4]);
+
+    travelTimeSeries->setLabelsVisible(true);
+    travelTimeSeries->setUseOpenGL(true);
+
+    chart->addSeries(travelTimeSeries);
+
+
+    ui->graphicsView->setChart(chart);
+}
+
+void MainWindow::handleFeesCountResults(QString r)
+{
+    qDebug() <<r;
+
+    qDebug() << r;
+
+    //if (displaySTButtonClicked) {
+        chart->removeAllSeries();
+        chart->removeAxis(axisX);
+        chart->removeAxis(axisY);
+    //}
+
+    if (allGrids) {
+        //All grids in Chengdu are selected.
+        chart->setTitle("The number of orders in Chengdu over time");
+    } else if (oneGrid) {
+        //Only one grid is selected.
+        chart->setTitle("The number of orders in one grid over time");
+    } else {
+        qDebug() << "Please select grid area.";
+    }
+
+    QPieSeries* travelTimeSeries = new QPieSeries();
+    //orderNumSeries->clea
+    chart->setTitle("Travel Time");
+
+    travelTimeSeries->append("0-10￥", travelTimeCountVector[0]);
+    travelTimeSeries->append("10-25￥", travelTimeCountVector[1]);
+    travelTimeSeries->append("25-50￥", travelTimeCountVector[2]);
+    travelTimeSeries->append("50-100￥", travelTimeCountVector[3]);
+    travelTimeSeries->append(">100￥", travelTimeCountVector[4]);
+
+    travelTimeSeries->setLabelsVisible(true);
+    travelTimeSeries->setUseOpenGL(true);
+
+    chart->addSeries(travelTimeSeries);
+
+
+    ui->graphicsView->setChart(chart);
+
 }
 
 void MainWindow::displaySTDemand()
@@ -280,7 +361,10 @@ void MainWindow::displaySTDemand()
         return;
     }
 
-    displayButtonClicked = 1;
+    displaySTButtonClicked = 1;
+    displayTimeButtonClicked = 0;
+    displayFeesButtonClicked = 0;
+
 
     if (oneGrid) {
         rowNum = ui->rowSpinBox->value();
@@ -294,7 +378,7 @@ void MainWindow::displaySTDemand()
     }
 
     CountThread* countThread = new CountThread(&mainData, &gridData);
-    connect(countThread, &CountThread::resultReady, this, &MainWindow::handleCountResults);
+    connect(countThread, &CountThread::resultReady, this, &MainWindow::handleSTCountResults);
     connect(countThread, &CountThread::finished, countThread, &QObject::deleteLater);
 
 
@@ -318,6 +402,38 @@ void MainWindow::displayTravelTime()
         QMessageBox::warning(this, "Warning!", "Please load file fist!");
         return;
     }
+
+    displaySTButtonClicked = 0;
+    displayTimeButtonClicked = 1;
+    displayFeesButtonClicked = 0;
+
+    if (oneGrid) {
+        rowNum = ui->rowSpinBox->value();
+        colNum = ui->columnSpinBox->value();
+        qDebug() << "a grid area is selected. (" << rowNum << ',' << colNum << ')';
+    } else if (allGrids) {
+        qDebug() << "All grids in Chengdu is selected.";
+    } else {
+        qDebug() << "Please select grid area.";
+        return;
+    }
+
+    CountThread* countThread = new CountThread(&mainData, &gridData);
+    connect(countThread, &CountThread::resultReady, this, &MainWindow::handleTimeCountResults);
+    connect(countThread, &CountThread::finished, countThread, &QObject::deleteLater);
+
+    startTimeStamp = ui->startTimeEdit->dateTime().toSecsSinceEpoch();
+    endTimeStamp = ui->endTimeEdit->dateTime().toSecsSinceEpoch();
+    startDay = ui->startTimeEdit->date().day() - 1;
+    endDay = ui->endTimeEdit->date().day() - 1;
+
+    qDebug() << startTimeStamp << endTimeStamp << startDay << endDay;
+
+    timeStep = ui->timeStepSpinBox->value() * timeUnit[ui->timeStepComboBox->currentIndex()];
+
+    qDebug() << allGrids << oneGrid;
+
+    countThread->start();
 }
 
 void MainWindow::displayOrderFees()
@@ -326,4 +442,36 @@ void MainWindow::displayOrderFees()
         QMessageBox::warning(this, "Warning!", "Please load file fist!");
         return;
     }
+
+    displaySTButtonClicked = 0;
+    displayTimeButtonClicked = 0;
+    displayFeesButtonClicked = 1;
+
+    if (oneGrid) {
+        rowNum = ui->rowSpinBox->value();
+        colNum = ui->columnSpinBox->value();
+        qDebug() << "a grid area is selected. (" << rowNum << ',' << colNum << ')';
+    } else if (allGrids) {
+        qDebug() << "All grids in Chengdu is selected.";
+    } else {
+        qDebug() << "Please select grid area.";
+        return;
+    }
+
+    CountThread* countThread = new CountThread(&mainData, &gridData);
+    connect(countThread, &CountThread::resultReady, this, &MainWindow::handleFeesCountResults);
+    connect(countThread, &CountThread::finished, countThread, &QObject::deleteLater);
+
+    startTimeStamp = ui->startTimeEdit->dateTime().toSecsSinceEpoch();
+    endTimeStamp = ui->endTimeEdit->dateTime().toSecsSinceEpoch();
+    startDay = ui->startTimeEdit->date().day() - 1;
+    endDay = ui->endTimeEdit->date().day() - 1;
+
+    qDebug() << startTimeStamp << endTimeStamp << startDay << endDay;
+
+    timeStep = ui->timeStepSpinBox->value() * timeUnit[ui->timeStepComboBox->currentIndex()];
+
+    qDebug() << allGrids << oneGrid;
+
+    countThread->start();
 }
