@@ -21,14 +21,14 @@ QVector<qint32> travelTimeCountVector(5);
 QVector<qint32> feesCountVector(5);
 //(0,5] (5, 10], (10, 20], (20, 30], (30, +∞)
 
-bool order_id = 0;
-bool departure_time = 0;
-bool end_time = 0;
-bool orig = 0;
-bool dest = 0;
-bool fee = 0;
+bool order_id_selected = 0;
+const bool departure_time_selected = 1;
+bool end_time_selected = 0;
+bool orig_selected = 0;
+bool dest_selected = 0;
+bool fee_selected = 0;
 
-bool allGrids = 0;
+bool allGrids = 1;
 bool oneGrid = 0;
 
 quint16 rowNum = 0;
@@ -37,3 +37,9 @@ quint16 colNum = 0;
 bool displaySTButtonClicked = 0;
 bool displayTimeButtonClicked = 0;
 bool displayFeesButtonClicked = 0;
+
+double totalRevenue = 0;
+
+QTime totalTime;
+
+bool needToReload = 0;//是否需要重新载入文件（即QCheckBox有没有改变）

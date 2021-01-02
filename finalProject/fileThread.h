@@ -12,13 +12,18 @@
 #include <QThread>
 #include <QVector>
 #include <algorithm>
+#include <QMutexLocker>
 
 class FileThread : public QThread {
     Q_OBJECT
-
+    mutable QMutex m_mutex;
+    bool m_cancel;
 public:
     FileThread(QVector<QVector<orderDataForm>>*, QVector<QVector<coordinate>>*);
     ~FileThread();
+
+    void cancel();
+    bool isCanceled() const;
 
     void run() override;
     QStringList fileList;

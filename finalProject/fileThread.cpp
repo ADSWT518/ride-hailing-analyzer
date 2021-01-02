@@ -1,22 +1,34 @@
 #include "fileThread.h"
 
+
 FileThread::FileThread(QVector<QVector<orderDataForm>>* mData, QVector<QVector<coordinate>>* gData)
 {
     mainData = mData;
     gridData = gData;
 }
 
-FileThread::~FileThread()
+FileThread::~FileThread() {}
+
+void FileThread::cancel()
 {
+    const QMutexLocker locker(&m_mutex);
+    m_cancel = true;
+}
+
+bool FileThread::isCanceled() const
+{
+    const QMutexLocker locker(&m_mutex);
+    return m_cancel;
 }
 
 
 void FileThread::run()
 {
     /* ... here is the expensive or blocking operation ... */
-
+    qDebug() <<"ahhaha";
+    m_cancel = false;
     QVector<orderDataForm> oneDayData;
-    for (qint32 i = 0; i < fileList.size() - 1; ++i) {
+    for (qint32 i = 0; !isCanceled() && i < fileList.size() - 1; ++i) {
         QFile file(directory.filePath(fileList[i].toLatin1()));
 
         if (i % dataPartsPerDay == 0) {
@@ -24,7 +36,7 @@ void FileThread::run()
         }
 
         if (file.open(QIODevice::ReadOnly)) {
-            //qDebug() << file << '\n';
+            qDebug() << file << '\n';
             QTextStream stream(&file);
             quint16 lineNum = 0;
             while (true) {
@@ -46,12 +58,14 @@ void FileThread::run()
             mainData->append(oneDayData);
         }
         //qDebug()<<fileNum<<allFileNum;
-        emit fileNumChanged(++fileNum);
+        if(!isCanceled()){
+            emit fileNumChanged(++fileNum);
+        }
     }
 
     QFile file(directory.filePath(fileList[fileList.size() - 1]));
-    if (file.open(QIODevice::ReadOnly)) {
-        qDebug() << file << '\n';
+    if (!isCanceled() && file.open(QIODevice::ReadOnly)) {
+//        qDebug() << file << '\n';
         QTextStream stream(&file);
         quint16 lineNum = 0;
         QVector<coordinate> row;
@@ -86,8 +100,14 @@ void FileThread::run()
         }
     }
     file.close();
-    emit fileNumChanged(++fileNum);
+    if(!isCanceled()){
+        emit fileNumChanged(++fileNum);
+    }
     //qDebug() <<mainData.size()<<mainData[0].size()<<mainData[0][0].size();
     //qDebug() <<gridData.size()<<gridData[0].size();
-    emit resultReady("Load successfully.");
+    if(!isCanceled()){
+        emit resultReady("Load successfully.");
+    }else{
+        emit resultReady("Loading progress is canceled, please load again.");
+    }
 }

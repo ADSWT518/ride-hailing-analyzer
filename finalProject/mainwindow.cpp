@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "countThread.h"
-#include "fileThread.h"
 #include "global.h"
 #include "ui_mainwindow.h"
 #include <algorithm>
@@ -47,6 +46,9 @@ void MainWindow::setupUI()
     menuBar()->addMenu(loadMenu);
     menuBar()->addMenu(displayMenu);
 
+    displayTravelTimeAction->setDisabled(true);
+    displayOrderFeesAction->setDisabled(true);
+
     chart = new QChart();
 
     ui->timeStepSpinBox->setMinimum(1);
@@ -66,16 +68,21 @@ void MainWindow::setupSignalSlots()
 {
     connect(openAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(ui->loadDataButton, &QPushButton::clicked, this, &MainWindow::loadFile);
+    connect(ui->cancelButton, &QPushButton::clicked, this, &MainWindow::cancelLoadFile);
 
     connect(displaySTDemandAction, &QAction::triggered, this, &MainWindow::displaySTDemand);
+    connect(displaySTDemandAction, &QAction::triggered, ui->lineEdit, &QLineEdit::clear);
     connect(ui->STDemandButton, &QPushButton::clicked, this, &MainWindow::displaySTDemand);
+    connect(ui->STDemandButton, &QPushButton::clicked, ui->lineEdit, &QLineEdit::clear);
     connect(displayTravelTimeAction, &QAction::triggered, this, &MainWindow::displayTravelTime);
+    connect(displayTravelTimeAction, &QAction::triggered, ui->lineEdit, &QLineEdit::clear);
     connect(ui->travelTimeButton, &QPushButton::clicked, this, &MainWindow::displayTravelTime);
+    connect(ui->travelTimeButton, &QPushButton::clicked, ui->lineEdit, &QLineEdit::clear);
     connect(displayOrderFeesAction, &QAction::triggered, this, &MainWindow::displayOrderFees);
     connect(ui->orderFeesButton, &QPushButton::clicked, this, &MainWindow::displayOrderFees);
 
     connect(ui->orderIDBox, &QCheckBox::stateChanged, this, &MainWindow::orderIDChanged);
-    connect(ui->depTimeBox, &QCheckBox::stateChanged, this, &MainWindow::depTimechanged);
+    //    connect(ui->depTimeBox, &QCheckBox::stateChanged, this, &MainWindow::depTimechanged);
     connect(ui->endTimeBox, &QCheckBox::stateChanged, this, &MainWindow::endTimeChanged);
     connect(ui->origBox, &QCheckBox::stateChanged, this, &MainWindow::origChanged);
     connect(ui->destBox, &QCheckBox::stateChanged, this, &MainWindow::destChanged);
@@ -129,7 +136,7 @@ void MainWindow::Lagrange_interpolation(QVector<qint64>& ocVector, QVector<qint6
             res += ocVector[j] * up / down;
             //qDebug() << up << down;
         }
-        qDebug() << res;
+//        qDebug() << res;
         ocVector.insert(ocVector.begin() + (2 * i + 1), res);
         tVector.append(startTimeStamp + tStep * i + tStep / 2);
     }
@@ -145,11 +152,25 @@ void MainWindow::Lagrange_interpolation(QVector<qint64>& ocVector, QVector<qint6
 
 void MainWindow::loadFile()
 {
+    totalTime.start();
+
+    if (m_currentFileThread) {
+        qDebug() << "???";
+        m_currentFileThread->cancel();
+    }
+
+    mainData.clear();
+    gridData.clear();
+    gridData.resize(11);
+    for (quint16 i = 0; i < 11; ++i) {
+        gridData[i].resize(11);
+    }
+
     FileThread* fileThread = new FileThread(&mainData, &gridData);
     connect(fileThread, &FileThread::resultReady, this, &MainWindow::handleFileResults);
     connect(fileThread, &FileThread::finished, fileThread, &QObject::deleteLater);
     connect(fileThread, &FileThread::fileNumChanged, this, &MainWindow::setProgressBar);
-
+    connect(fileThread, &FileThread::destroyed, this, &MainWindow::fileThreadDestroy);
     QString dirName = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
                                                         "../",
                                                         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks)
@@ -171,21 +192,31 @@ void MainWindow::loadFile()
     allFileNum = fileList.count();
     ui->UIprogressBar->setMinimum(0);
     ui->UIprogressBar->setMaximum(allFileNum);
-
+    m_currentFileThread = fileThread;
+    ui->statusbar->showMessage(tr("Loading..."));
     fileThread->start();
+}
+
+void MainWindow::cancelLoadFile()
+{
+    if (m_currentFileThread) {
+        qDebug() << "cancel";
+        m_currentFileThread->cancel();
+        ui->UIprogressBar->setValue(0);
+    }
 }
 
 void MainWindow::handleFileResults(QString r)
 {
-    qDebug() << r;
-    fileLoaded = true;
-
-    //    for (int i = 0; i < gridData.size(); ++i) {
-    //        for (int j = 0; j < gridData.at(0).size(); ++j) {
-    //            std::cout << '(' << gridData[i][j].lng << ',' << gridData[i][j].lat << ')';
-    //        }
-    //        std::cout << '\n';
-    //    }
+    QString status= r;
+    if (r == "Load successfully.") {
+        status += " Total time is " + QString::number(totalTime.elapsed() / 1000.0) + 's';
+    }
+    ui->statusbar->showMessage(tr(status.toLocal8Bit().data()));
+    if (r == "Load successfully.") {
+        fileLoaded = true;
+    }
+    needToReload = false;
 }
 
 void MainWindow::setProgressBar(quint16 fileNum)
@@ -196,31 +227,51 @@ void MainWindow::setProgressBar(quint16 fileNum)
 
 void MainWindow::orderIDChanged(quint32 state)
 {
-    order_id = state;
+    order_id_selected = state;
 }
-void MainWindow::depTimechanged(quint32 state)
-{
-    departure_time = state;
-}
+//void MainWindow::depTimechanged(quint32 state)
+//{
+//    departure_time_selected = state;
+//}
 void MainWindow::endTimeChanged(quint32 state)
 {
-    end_time = state;
+    end_time_selected = state;
+    needToReload = state;
+    ui->travelTimeButton->setEnabled(end_time_selected);
+    displayTravelTimeAction->setEnabled(end_time_selected);
 }
 void MainWindow::origChanged(quint32 state)
 {
-    orig = state;
-    qDebug() << "orig:" << orig;
+    orig_selected = state;
+    needToReload = state;
+    ui->allGridRadioButton->setEnabled(orig_selected);
+    if (orig_selected) {
+        ui->allGridRadioButton->setCheckable(false);
+        ui->allGridRadioButton->setCheckable(true);
+    } else {
+        ui->allGridRadioButton->setChecked(true);
+    }
+
+    allGrids = !orig_selected;
+    qDebug() << allGrids;
+    ui->oneGridRadioButton->setEnabled(orig_selected);
+    ui->rowSpinBox->setEnabled(orig_selected);
+    ui->columnSpinBox->setEnabled(orig_selected);
+    ui->label_8->setEnabled(orig_selected);
+    ui->label_9->setEnabled(orig_selected);
 }
 void MainWindow::destChanged(quint32 state)
 {
-    dest = state;
-    qDebug() << "dest:" << dest;
+    dest_selected = state;
 }
 void MainWindow::feeChanged(quint32 state)
 {
-    fee = state;
-}
+    fee_selected = state;
+    needToReload = state;
 
+    ui->orderFeesButton->setEnabled(fee_selected);
+    displayOrderFeesAction->setEnabled(fee_selected);
+}
 
 void MainWindow::allGridsSelected()
 {
@@ -236,158 +287,168 @@ void MainWindow::oneGridSelected()
 
 void MainWindow::handleSTCountResults(QString r)
 {
-    qDebug() << r;
+    if (r == "Plot successfully!") {
+        if (displaySTButtonClicked) {
+            chart->removeAllSeries();
+            chart->removeAxis(axisX);
+            chart->removeAxis(axisY);
+        }
 
-    if (displaySTButtonClicked) {
-        chart->removeAllSeries();
-        chart->removeAxis(axisX);
-        chart->removeAxis(axisY);
-    }
+        //qDebug() <<"chart->series().size()"<<chart->series().size();
 
-    //qDebug() <<"chart->series().size()"<<chart->series().size();
+        if (allGrids) {
+            //All grids in Chengdu are selected.
+            chart->setTitle("The number of orders in Chengdu over time");
 
-    if (allGrids) {
-        //All grids in Chengdu are selected.
-        chart->setTitle("The number of orders in Chengdu over time");
+        } else if (oneGrid) {
+            //Only one grid is selected.
+            chart->setTitle("The number of orders in one grid over time");
 
-    } else if (oneGrid) {
-        //Only one grid is selected.
-        chart->setTitle("The number of orders in one grid over time");
+        } else {
+            QMessageBox::warning(this, "Warning!", "Please select grid area.");
+            return;
+        }
 
-    } else {
-        qDebug() << "Please select grid area.";
-    }
+        QLineSeries* orderNumSeries = new QLineSeries();
+        //orderNumSeries->clear();
 
-    QLineSeries* orderNumSeries = new QLineSeries();
-    //orderNumSeries->clear();
+        QVector<qint64> timeVector;
 
-    QVector<qint64> timeVector;
+        for (qint32 i = 0; i < orderCountVector.size(); ++i) {
+            timeVector.push_back(startTimeStamp + timeStep * i);
+        }
 
-    for (qint32 i = 0; i < orderCountVector.size(); ++i) {
-        timeVector.push_back(startTimeStamp + timeStep * i);
-    }
+        quint32 tStep = timeStep;
+        while (orderCountVector.size() <= minPointNumInChart) {
+            //when only a few data points are selected, use interpolation
+            Lagrange_interpolation(orderCountVector, timeVector, tStep);
+            tStep /= 2;
+        }
 
-    quint32 tStep = timeStep;
-    while (orderCountVector.size() <= minPointNumInChart) {
-        //when only a few data points are selected, use interpolation
-        Lagrange_interpolation(orderCountVector, timeVector, tStep);
-        tStep /= 2;
-    }
+        //qDebug() << "orderCountVector:" << orderCountVector;
+        //qDebug() << "timeVector:" << timeVector;
 
-    //qDebug() << "orderCountVector:" << orderCountVector;
-    //qDebug() << "timeVector:" << timeVector;
+//        qDebug() << orderCountVector.size() << timeVector.size();
+        for (qint32 i = 0; i < orderCountVector.size(); ++i) {
+            QDateTime dt;
+            dt.setSecsSinceEpoch(timeVector[i]);
+            orderNumSeries->append(dt.toMSecsSinceEpoch(), orderCountVector[i]);
+            //qDebug() <<'('<<startTimeStamp + timeStep * i<<','<< orderCountVector[i]<<')';
+        }
+        chart->addSeries(orderNumSeries);
 
-    qDebug() << orderCountVector.size() << timeVector.size();
-    for (qint32 i = 0; i < orderCountVector.size(); ++i) {
+//        qDebug() << "orderCountVector.size():" << orderCountVector.size();
+        //qDebug() <<"orderCountVector"<<orderCountVector;
+//        qDebug() << "sum of orderCountVector:" << std::accumulate(orderCountVector.begin(), orderCountVector.end(), 0);
+
+        axisX->setFormat("dd-MM-yyyy h:mm");
         QDateTime dt;
-        dt.setSecsSinceEpoch(timeVector[i]);
-        orderNumSeries->append(dt.toMSecsSinceEpoch(), orderCountVector[i]);
-        //qDebug() <<'('<<startTimeStamp + timeStep * i<<','<< orderCountVector[i]<<')';
+        dt.setSecsSinceEpoch(timeVector[0]);
+        QDateTime min = dt;
+        dt.setSecsSinceEpoch(timeVector.back());
+        QDateTime max = dt;
+        axisX->setRange(min, max);
+
+        axisY->setRange(0, *std::max_element(orderCountVector.begin(), orderCountVector.end()));
+        axisY->setTitleText("num");
+        //axisY->setLabelFormat("%d");
+        //axisY->setTickCount(14);
+        //axisY->setMinorTickCount(5);
+
+        chart->setAxisX(axisX, orderNumSeries);
+        chart->setAxisY(axisY, orderNumSeries);
+
+
+        ui->graphicsView->setChart(chart);
+
+        QString status = r + " Total time is " + QString::number(totalTime.elapsed() / 1000.0) + 's';
+        ui->statusbar->showMessage(tr(status.toLocal8Bit().data()));
     }
-    chart->addSeries(orderNumSeries);
-
-    qDebug() << "orderCountVector.size():" << orderCountVector.size();
-    //qDebug() <<"orderCountVector"<<orderCountVector;
-    qDebug() << "sum of orderCountVector:" << std::accumulate(orderCountVector.begin(), orderCountVector.end(), 0);
-
-    axisX->setFormat("dd-MM-yyyy h:mm");
-    QDateTime dt;
-    dt.setSecsSinceEpoch(timeVector[0]);
-    QDateTime min = dt;
-    dt.setSecsSinceEpoch(timeVector.back());
-    QDateTime max = dt;
-    axisX->setRange(min, max);
-
-    axisY->setRange(0, *std::max_element(orderCountVector.begin(), orderCountVector.end()));
-    axisY->setTitleText("num");
-    //axisY->setLabelFormat("%d");
-    //axisY->setTickCount(14);
-    //axisY->setMinorTickCount(5);
-
-    chart->setAxisX(axisX, orderNumSeries);
-    chart->setAxisY(axisY, orderNumSeries);
-
-
-    ui->graphicsView->setChart(chart);
 }
 
 void MainWindow::handleTimeCountResults(QString r)
 {
-    qDebug() << r;
+//    qDebug() << r;
+    if (r == "Plot successfully!") {
+        //if (displaySTButtonClicked) {
+        chart->removeAllSeries();
+        chart->removeAxis(axisX);
+        chart->removeAxis(axisY);
+        //}
+        chart->setAnimationDuration(QChart::AllAnimations);
+        if (allGrids) {
+            //All grids in Chengdu are selected.
+            chart->setTitle("Travel time in Chengdu");
+        } else if (oneGrid) {
+            //Only one grid is selected.
+            chart->setTitle("Travel time in one grid");
+        } else {
+            QMessageBox::warning(this, "Warning!", "Please select grid area.");
+            return;
+        }
 
-    //if (displaySTButtonClicked) {
-    chart->removeAllSeries();
-    chart->removeAxis(axisX);
-    chart->removeAxis(axisY);
-    //}
+        QPieSeries* travelTimeSeries = new QPieSeries();
+        //orderNumSeries->clea
 
-    if (allGrids) {
-        //All grids in Chengdu are selected.
-        chart->setTitle("Travel time in Chengdu");
-    } else if (oneGrid) {
-        //Only one grid is selected.
-        chart->setTitle("Travel time in one grid");
-    } else {
-        qDebug() << "Please select grid area.";
+        travelTimeSeries->append("0-15min", travelTimeCountVector[0]);
+        travelTimeSeries->append("15-30min", travelTimeCountVector[1]);
+        travelTimeSeries->append("30-45min", travelTimeCountVector[2]);
+        travelTimeSeries->append("45-90min", travelTimeCountVector[3]);
+        travelTimeSeries->append(">90min", travelTimeCountVector[4]);
+
+        travelTimeSeries->setLabelsVisible(true);
+        travelTimeSeries->setUseOpenGL(true);
+
+        chart->addSeries(travelTimeSeries);
+
+        ui->graphicsView->setChart(chart);
+        QString status = r + " Total time is " + QString::number(totalTime.elapsed() / 1000.0) + 's';
+        ui->statusbar->showMessage(tr(status.toLocal8Bit().data()));
     }
-
-    QPieSeries* travelTimeSeries = new QPieSeries();
-    //orderNumSeries->clea
-
-    travelTimeSeries->append("0-15min", travelTimeCountVector[0]);
-    travelTimeSeries->append("15-30min", travelTimeCountVector[1]);
-    travelTimeSeries->append("30-45min", travelTimeCountVector[2]);
-    travelTimeSeries->append("45-90min", travelTimeCountVector[3]);
-    travelTimeSeries->append(">90min", travelTimeCountVector[4]);
-
-    travelTimeSeries->setLabelsVisible(true);
-    travelTimeSeries->setUseOpenGL(true);
-
-    chart->addSeries(travelTimeSeries);
-
-
-    ui->graphicsView->setChart(chart);
 }
 
 void MainWindow::handleFeesCountResults(QString r)
 {
     qDebug() << r;
 
-    qDebug() << r;
+    if (r == "Plot successfully!") {
+        ui->lineEdit->setText(QString::number(totalRevenue, 'f', 2));
 
-    //if (displaySTButtonClicked) {
-    chart->removeAllSeries();
-    chart->removeAxis(axisX);
-    chart->removeAxis(axisY);
-    //}
+        //if (displaySTButtonClicked) {
+        chart->removeAllSeries();
+        chart->removeAxis(axisX);
+        chart->removeAxis(axisY);
+        //}
+        chart->setAnimationDuration(QChart::AllAnimations);
 
-    if (allGrids) {
-        //All grids in Chengdu are selected.
-        chart->setTitle("Order fees in Chengdu during this time");
-    } else if (oneGrid) {
-        //Only one grid is selected.
-        chart->setTitle("Order fees in one grid during this time");
-    } else {
-        qDebug() << "Please select grid area.";
+        if (allGrids) {
+            //All grids in Chengdu are selected.
+            chart->setTitle("Order fees in Chengdu during this time");
+        } else if (oneGrid) {
+            //Only one grid is selected.
+            chart->setTitle("Order fees in one grid during this time");
+        } else {
+            QMessageBox::warning(this, "Warning!", "Please select grid area.");
+            return;
+        }
+
+        QPieSeries* travelTimeSeries = new QPieSeries();
+
+        travelTimeSeries->append("0-5￥", feesCountVector[0]);
+        travelTimeSeries->append("5-10￥", feesCountVector[1]);
+        travelTimeSeries->append("10-20￥", feesCountVector[2]);
+        travelTimeSeries->append("20-30￥", feesCountVector[3]);
+        travelTimeSeries->append(">30￥", feesCountVector[4]);
+
+        travelTimeSeries->setLabelsVisible(true);
+        travelTimeSeries->setUseOpenGL(true);
+
+        chart->addSeries(travelTimeSeries);
+
+        ui->graphicsView->setChart(chart);
+        QString status = r + " Total time is " + QString::number(totalTime.elapsed() / 1000.0) + 's';
+        ui->statusbar->showMessage(tr(status.toLocal8Bit().data()));
     }
-
-    QPieSeries* travelTimeSeries = new QPieSeries();
-    //orderNumSeries->clea
-
-
-    travelTimeSeries->append("0-5￥", feesCountVector[0]);
-    travelTimeSeries->append("5-10￥", feesCountVector[1]);
-    travelTimeSeries->append("10-20￥", feesCountVector[2]);
-    travelTimeSeries->append("20-30￥", feesCountVector[3]);
-    travelTimeSeries->append(">30￥", feesCountVector[4]);
-
-    travelTimeSeries->setLabelsVisible(true);
-    travelTimeSeries->setUseOpenGL(true);
-
-    chart->addSeries(travelTimeSeries);
-
-
-    ui->graphicsView->setChart(chart);
 }
 
 void MainWindow::displaySTDemand()
@@ -397,6 +458,25 @@ void MainWindow::displaySTDemand()
         return;
     }
 
+    if(needToReload){
+        QMessageBox::warning(this, "Warning!", "Please reload file!");
+        return;
+    }
+
+    if (m_currentCountThread) {
+//        qDebug() << "???";
+        m_currentCountThread->cancel();
+    }
+    orderCountVector.clear();
+
+    totalTime.restart();
+
+    ui->statusbar->showMessage(tr("Analysing..."));
+
+    ui->label_10->setEnabled(false);
+    ui->label_11->setEnabled(false);
+    ui->lineEdit->setEnabled(false);
+
     displaySTButtonClicked = 1;
     displayTimeButtonClicked = 0;
     displayFeesButtonClicked = 0;
@@ -405,17 +485,19 @@ void MainWindow::displaySTDemand()
     if (oneGrid) {
         rowNum = ui->rowSpinBox->value();
         colNum = ui->columnSpinBox->value();
-        qDebug() << "a grid area is selected. (" << rowNum << ',' << colNum << ')';
+//        qDebug() << "a grid area is selected. (" << rowNum << ',' << colNum << ')';
     } else if (allGrids) {
-        qDebug() << "All grids in Chengdu is selected.";
+//        qDebug() << "All grids in Chengdu is selected.";
     } else {
-        qDebug() << "Please select grid area.";
+        QMessageBox::warning(this, "Warning!", "Please select grid area.");
+//        qDebug() << "Please select grid area.";
         return;
     }
 
     CountThread* countThread = new CountThread(&mainData, &gridData);
     connect(countThread, &CountThread::resultReady, this, &MainWindow::handleSTCountResults);
     connect(countThread, &CountThread::finished, countThread, &QObject::deleteLater);
+    connect(countThread, &FileThread::destroyed, this, &MainWindow::countThreadDestroy);
 
 
     startTimeStamp = ui->startTimeEdit->dateTime().toSecsSinceEpoch();
@@ -423,12 +505,12 @@ void MainWindow::displaySTDemand()
     startDay = ui->startTimeEdit->date().day() - 1;
     endDay = ui->endTimeEdit->date().day() - 1;
 
-    qDebug() << startTimeStamp << endTimeStamp << startDay << endDay;
+//    qDebug() << startTimeStamp << endTimeStamp << startDay << endDay;
 
     timeStep = ui->timeStepSpinBox->value() * timeUnit[ui->timeStepComboBox->currentIndex()];
 
-    qDebug() << allGrids << oneGrid;
-
+//    qDebug() << allGrids << oneGrid;
+    m_currentCountThread = countThread;
     countThread->start();
 }
 
@@ -438,6 +520,18 @@ void MainWindow::displayTravelTime()
         QMessageBox::warning(this, "Warning!", "Please load file fist!");
         return;
     }
+
+    if(needToReload){
+        QMessageBox::warning(this, "Warning!", "Please reload file!");
+        return;
+    }
+
+    totalTime.restart();
+
+    ui->statusbar->showMessage(tr("Analysing..."));
+    ui->label_10->setEnabled(false);
+    ui->label_11->setEnabled(false);
+    ui->lineEdit->setEnabled(false);
 
     displaySTButtonClicked = 0;
     displayTimeButtonClicked = 1;
@@ -450,7 +544,7 @@ void MainWindow::displayTravelTime()
     } else if (allGrids) {
         qDebug() << "All grids in Chengdu is selected.";
     } else {
-        qDebug() << "Please select grid area.";
+        QMessageBox::warning(this, "Warning!", "Please load file fist!");
         return;
     }
 
@@ -463,11 +557,11 @@ void MainWindow::displayTravelTime()
     startDay = ui->startTimeEdit->date().day() - 1;
     endDay = ui->endTimeEdit->date().day() - 1;
 
-    qDebug() << startTimeStamp << endTimeStamp << startDay << endDay;
+//    qDebug() << startTimeStamp << endTimeStamp << startDay << endDay;
 
     timeStep = ui->timeStepSpinBox->value() * timeUnit[ui->timeStepComboBox->currentIndex()];
 
-    qDebug() << allGrids << oneGrid;
+//    qDebug() << allGrids << oneGrid;
 
     countThread->start();
 }
@@ -478,6 +572,19 @@ void MainWindow::displayOrderFees()
         QMessageBox::warning(this, "Warning!", "Please load file fist!");
         return;
     }
+
+    if(needToReload){
+        QMessageBox::warning(this, "Warning!", "Please reload file!");
+        return;
+    }
+
+    totalTime.restart();
+    ui->statusbar->showMessage(tr("Analysing..."));
+
+    totalRevenue = 0;
+    ui->label_10->setEnabled(true);
+    ui->label_11->setEnabled(true);
+    ui->lineEdit->setEnabled(true);
 
     displaySTButtonClicked = 0;
     displayTimeButtonClicked = 0;
@@ -490,7 +597,7 @@ void MainWindow::displayOrderFees()
     } else if (allGrids) {
         qDebug() << "All grids in Chengdu is selected.";
     } else {
-        qDebug() << "Please select grid area.";
+        QMessageBox::warning(this, "Warning!", "Please select grid area.");
         return;
     }
 
@@ -510,4 +617,18 @@ void MainWindow::displayOrderFees()
     qDebug() << allGrids << oneGrid;
 
     countThread->start();
+}
+
+void MainWindow::fileThreadDestroy(QObject* obj)
+{
+    if (m_currentFileThread == obj) {
+        m_currentFileThread = nullptr;
+    }
+}
+
+void MainWindow::countThreadDestroy(QObject* obj)
+{
+    if (m_currentCountThread == obj) {
+        m_currentCountThread = nullptr;
+    }
 }

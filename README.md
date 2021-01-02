@@ -38,7 +38,7 @@ meet Dr. Ling in office hour
 
 **TODO:**
 
-- [ ] 数据存储方式，不要用一个大数组，可以考虑每个field搞一个数组，方便调用
+- [ ] ~~数据存储方式，不要用一个大数组，可以考虑每个field搞一个数组，方便调用~~ 这样行不通的
 - [x] 把`timeStep`的选择做成动态的，也就是用一个`QSpinBox`，只要改变了，就reload图像
 - [x] 使用`departure_time`来排序，而不是使用没有实际意义的`mid_time`
 - [x] 把画图与计算分离，计算部分放到一个新的thread里面去
@@ -69,12 +69,16 @@ meet Dr. Ling in office hour
 
 - [ ] 在拉格朗日插值里面，为啥把数组`timeVector`的类型设为`qint32`就不对，设置成`qint64`就对了。。。
 
-- [ ] ```
-  如果最后一组数据在达到timeStep之前就超过了endTimeStamp，那么舍弃它
-  ```
-
+- [ ] `如果最后一组数据在达到timeStep之前就超过了endTimeStamp，那么舍弃它`
+  
   感觉不能用这个规则，不然有时候舍弃的太多了
 
 ### 12.25
 
 - [ ] 奇怪的bug：按照grid绘图的时候，前两次会画出来大概两倍于正常的点——第三次就正常了
+
+### 1.2
+
+我怎么还没做完:broken_heart:
+
+- [ ] 一开始没选中fee，第二次导入时选中，结果还是显示不出来

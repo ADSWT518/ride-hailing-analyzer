@@ -3,6 +3,7 @@
 
 #include <QtGlobal>
 #include <QVector>
+#include <QTime>
 
 #define dataPartsPerDay 5
 #define minPointNumInChart 8
@@ -23,12 +24,12 @@ extern QVector<qint64> orderCountVector;
 extern QVector<qint32> travelTimeCountVector;
 extern QVector<qint32> feesCountVector;
 
-extern bool order_id;
-extern bool departure_time;
-extern bool end_time;
-extern bool orig;
-extern bool dest;
-extern bool fee;
+extern bool order_id_selected;
+extern const bool departure_time_selected;
+extern bool end_time_selected;
+extern bool orig_selected;
+extern bool dest_selected;
+extern bool fee_selected;
 
 extern bool allGrids;
 extern bool oneGrid;
@@ -39,5 +40,11 @@ extern quint16 colNum;
 extern bool displaySTButtonClicked;
 extern bool displayTimeButtonClicked;
 extern bool displayFeesButtonClicked;
+
+extern double totalRevenue;
+
+extern QTime totalTime;
+
+extern bool needToReload;
 
 #endif// GLOBAL_H

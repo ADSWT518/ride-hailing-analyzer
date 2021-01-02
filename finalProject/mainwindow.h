@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include "dataForm.h"
+#include "fileThread.h"
+#include "countThread.h"
 #include "global.h"
 #include <QDebug>
 #include <QMainWindow>
@@ -24,6 +26,7 @@ public:
 
 private slots:
     void loadFile();
+    void cancelLoadFile();
     //void display();
     void handleFileResults(QString);
     void setProgressBar(quint16);
@@ -32,13 +35,13 @@ private slots:
     void displayTravelTime();
     void displayOrderFees();
 
+    //data fields
     void orderIDChanged(quint32);
-    void depTimechanged(quint32);
+//    void depTimechanged(quint32);
     void endTimeChanged(quint32);
     void origChanged(quint32);
     void destChanged(quint32);
     void feeChanged(quint32);
-
 
     void allGridsSelected();
     void oneGridSelected();
@@ -47,6 +50,9 @@ private slots:
     void handleTimeCountResults(QString);
     void handleFeesCountResults(QString);
     //void reloadChart();
+
+    void fileThreadDestroy(QObject* obj);
+    void countThreadDestroy(QObject* obj);
 
 private:
     Ui::MainWindow* ui;
@@ -73,6 +79,8 @@ private:
 
     bool fileLoaded = 0;
 
+    FileThread* m_currentFileThread = nullptr;
+    CountThread* m_currentCountThread = nullptr;
 
 };
 #endif// MAINWINDOW_H

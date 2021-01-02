@@ -1,4 +1,6 @@
 #include "dataForm.h"
+#include "global.h"
+#include <QDebug>
 
 coordinate::coordinate(double longitude, double latitude) : lng(longitude), lat(latitude)
 {
@@ -16,14 +18,28 @@ coordinate& coordinate::operator=(const coordinate& co)
 }
 
 
-orderDataForm::orderDataForm(QStringList lst):
-    orig(lst[3].trimmed().toDouble(), lst[4].trimmed().toDouble()),
-    dest(lst[5].trimmed().toDouble(), lst[6].trimmed().toDouble())
+orderDataForm::orderDataForm(QStringList lst)
 {
-    order_id = lst[0].trimmed();
-    departure_time = lst[1].trimmed().toUInt();
-    end_time = lst[2].trimmed().toUInt();
-    fee = lst[7].trimmed().toDouble();
+    if(order_id_selected){
+        order_id = lst[0].trimmed();
+    }
+    if(departure_time_selected){
+        departure_time = lst[1].trimmed().toUInt();
+    }
+    if(end_time_selected){
+        end_time = lst[2].trimmed().toUInt();
+    }
+    if(orig_selected){
+        coordinate Orig(lst[3].trimmed().toDouble(), lst[4].trimmed().toDouble());
+        orig = Orig;
+    }
+    if(dest_selected){
+        coordinate Dest(lst[5].trimmed().toDouble(), lst[6].trimmed().toDouble());
+        dest = Dest;
+    }
+    if(fee_selected){
+        fee = lst[7].trimmed().toDouble();
+    }
 }
 
 //void orderDataForm::operator=(const orderDataForm& order):
