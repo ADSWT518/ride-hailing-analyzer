@@ -4,10 +4,8 @@
 
 bool isInGrid(coordinate point, QVector<QVector<coordinate>> gData, quint16 rNum, quint16 cNum)
 {
-    //    if (point.lat >= gData[rNum - 1][0].lat && point.lat <= gData[rNum][0].lat && point.lng >= gData[0][cNum - 1].lng && point.lng <= gData[0][cNum].lng) {
-    //        qDebug() << '(' << point.lng << ',' << point.lat << ')';
-    //        qDebug() << gData[0][cNum - 1].lng << gData[0][cNum].lng << gData[rNum][0].lat << gData[rNum - 1][0].lat;
-    //    }
+//            qDebug() << '(' << point.lng << ',' << point.lat << ')';
+//            qDebug() << gData[0][cNum - 1].lng << gData[0][cNum].lng << gData[rNum][0].lat << gData[rNum - 1][0].lat;
     if (rNum <= 0 || rNum > 10 || cNum <= 0 || cNum > 10) {
         qDebug() << "grid id overflow";
     }
@@ -15,12 +13,9 @@ bool isInGrid(coordinate point, QVector<QVector<coordinate>> gData, quint16 rNum
 }
 
 
-CountThread::CountThread(QVector<QVector<orderDataForm>>* mData, QVector<QVector<coordinate>>* gData) : mainData(mData), gridData(gData)
-{
-}
+CountThread::CountThread(QVector<QVector<orderDataForm>>* mData, QVector<QVector<coordinate>>* gData) : mainData(mData), gridData(gData) {}
 
 CountThread::~CountThread() {}
-
 
 void CountThread::cancel()
 {
@@ -37,8 +32,11 @@ bool CountThread::isCanceled() const
 
 void CountThread::run()
 {
+//    qDebug() <<"aaaa";
     m_cancel = false;
     if (!isCanceled()) {
+//        qDebug() <<"bbbb";
+        qDebug() <<displayTimeButtonClicked<<allGrids<<oneGrid;
         if (displaySTButtonClicked) {
             if (allGrids) {
                 //整个成都的情况
@@ -86,6 +84,7 @@ void CountThread::run()
                 }
             } else {
                 //某一个grid的情况
+//                qDebug() <<"cccc";
                 quint32 startIndex = 0;
                 for (qint32 i = 0; !isCanceled() && i < mainData->at(startDay).size(); ++i) {
                     if (isInGrid(mainData->at(startDay)[i].orig, *gridData, rowNum, colNum) && mainData->at(startDay)[i].departure_time >= startTimeStamp) {
@@ -103,17 +102,22 @@ void CountThread::run()
                 //qDebug() << "timeStep: " << timeStep << "startIndex: " << startIndex;
                 orderCountVector.clear();
                 orderCount = 0;
+
                 for (qint32 i = startIndex; !isCanceled() && mainData->at(curDay)[i].departure_time <= endTimeStamp; ++i) {
                     //qDebug() <<"mainData->at(curDay)[i].departure_time"<<mainData->at(curDay)[i].departure_time;
-
+//                    qDebug() <<"ccc1";
                     //如果最后一组数据在达到timeStep之前就超过了endTimeStamp，那么舍弃它
 
                     if (mainData->at(curDay)[i].departure_time <= curTimeStamp + timeStep) {
+//                        qDebug() <<"ccc2";
+
                         if (isInGrid(mainData->at(curDay)[i].orig, *gridData, rowNum, colNum)) {
+//                            qDebug() <<"ccc";
+
                             ++orderCount;
                         }
                     } else {
-                        //qDebug() << "orderCount: " << orderCount;
+                        qDebug() << "orderCount: " << orderCount;
                         orderCountVector.append(orderCount);
                         curTimeStamp += timeStep;
                         orderCount = 0;
@@ -128,6 +132,8 @@ void CountThread::run()
                         }
                     }
                 }
+                qDebug() << travelTimeCountVector;
+
             }
         } else if (displayTimeButtonClicked) {
             if (allGrids) {
@@ -198,7 +204,6 @@ void CountThread::run()
                 }
             }
 
-            //qDebug() << travelTimeCountVector;
         } else if (displayFeesButtonClicked) {
             if (allGrids) {
                 //整个成都的情况
@@ -249,8 +254,8 @@ void CountThread::run()
 
                     //如果最后一组数据在达到timeStep之前就超过了endTimeStamp，那么舍弃它
                     double t = mainData->at(curDay)[i].fee;
-                    totalRevenue += t;
                     if (isInGrid(mainData->at(curDay)[i].orig, *gridData, rowNum, colNum)) {
+                        totalRevenue += t;
                         if (t <= 5) {
                             ++feesCountVector[0];
                         } else if (t <= 10) {

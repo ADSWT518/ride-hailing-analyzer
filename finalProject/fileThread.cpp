@@ -65,7 +65,7 @@ void FileThread::run()
 
     QFile file(directory.filePath(fileList[fileList.size() - 1]));
     if (!isCanceled() && file.open(QIODevice::ReadOnly)) {
-//        qDebug() << file << '\n';
+        qDebug() << file << '\n';
         QTextStream stream(&file);
         quint16 lineNum = 0;
         QVector<coordinate> row;
@@ -103,8 +103,9 @@ void FileThread::run()
     if(!isCanceled()){
         emit fileNumChanged(++fileNum);
     }
-    //qDebug() <<mainData.size()<<mainData[0].size()<<mainData[0][0].size();
-    //qDebug() <<gridData.size()<<gridData[0].size();
+    qDebug() <<mainData->size()<<mainData->operator[](0).size();
+
+    qDebug() <<gridData->size()<<gridData->operator[](0).size();
     if(!isCanceled()){
         emit resultReady("Load successfully.");
     }else{

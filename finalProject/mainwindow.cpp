@@ -388,7 +388,6 @@ void MainWindow::handleTimeCountResults(QString r)
         }
 
         QPieSeries* travelTimeSeries = new QPieSeries();
-        //orderNumSeries->clea
 
         travelTimeSeries->append("0-15min", travelTimeCountVector[0]);
         travelTimeSeries->append("15-30min", travelTimeCountVector[1]);
@@ -469,10 +468,6 @@ void MainWindow::displaySTDemand()
     }
     orderCountVector.clear();
 
-    totalTime.restart();
-
-    ui->statusbar->showMessage(tr("Analysing..."));
-
     ui->label_10->setEnabled(false);
     ui->label_11->setEnabled(false);
     ui->lineEdit->setEnabled(false);
@@ -494,6 +489,10 @@ void MainWindow::displaySTDemand()
         return;
     }
 
+    totalTime.restart();
+
+    ui->statusbar->showMessage(tr("Analysing..."));
+
     CountThread* countThread = new CountThread(&mainData, &gridData);
     connect(countThread, &CountThread::resultReady, this, &MainWindow::handleSTCountResults);
     connect(countThread, &CountThread::finished, countThread, &QObject::deleteLater);
@@ -509,7 +508,7 @@ void MainWindow::displaySTDemand()
 
     timeStep = ui->timeStepSpinBox->value() * timeUnit[ui->timeStepComboBox->currentIndex()];
 
-//    qDebug() << allGrids << oneGrid;
+    qDebug() << allGrids << oneGrid;
     m_currentCountThread = countThread;
     countThread->start();
 }
@@ -526,9 +525,6 @@ void MainWindow::displayTravelTime()
         return;
     }
 
-    totalTime.restart();
-
-    ui->statusbar->showMessage(tr("Analysing..."));
     ui->label_10->setEnabled(false);
     ui->label_11->setEnabled(false);
     ui->lineEdit->setEnabled(false);
@@ -548,6 +544,9 @@ void MainWindow::displayTravelTime()
         return;
     }
 
+    totalTime.restart();
+    ui->statusbar->showMessage(tr("Analysing..."));
+
     CountThread* countThread = new CountThread(&mainData, &gridData);
     connect(countThread, &CountThread::resultReady, this, &MainWindow::handleTimeCountResults);
     connect(countThread, &CountThread::finished, countThread, &QObject::deleteLater);
@@ -561,8 +560,8 @@ void MainWindow::displayTravelTime()
 
     timeStep = ui->timeStepSpinBox->value() * timeUnit[ui->timeStepComboBox->currentIndex()];
 
-//    qDebug() << allGrids << oneGrid;
-
+    qDebug() << allGrids << oneGrid;
+    qDebug() <<displayTimeButtonClicked;
     countThread->start();
 }
 
@@ -577,9 +576,6 @@ void MainWindow::displayOrderFees()
         QMessageBox::warning(this, "Warning!", "Please reload file!");
         return;
     }
-
-    totalTime.restart();
-    ui->statusbar->showMessage(tr("Analysing..."));
 
     totalRevenue = 0;
     ui->label_10->setEnabled(true);
@@ -600,6 +596,9 @@ void MainWindow::displayOrderFees()
         QMessageBox::warning(this, "Warning!", "Please select grid area.");
         return;
     }
+
+    totalTime.restart();
+    ui->statusbar->showMessage(tr("Analysing..."));
 
     CountThread* countThread = new CountThread(&mainData, &gridData);
     connect(countThread, &CountThread::resultReady, this, &MainWindow::handleFeesCountResults);

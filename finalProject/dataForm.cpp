@@ -2,9 +2,7 @@
 #include "global.h"
 #include <QDebug>
 
-coordinate::coordinate(double longitude, double latitude) : lng(longitude), lat(latitude)
-{
-}
+coordinate::coordinate(double longitude, double latitude) : lng(longitude), lat(latitude) {}
 
 coordinate::coordinate():lng(0), lat(0){}
 
@@ -41,24 +39,6 @@ orderDataForm::orderDataForm(QStringList lst)
         fee = lst[7].trimmed().toDouble();
     }
 }
-
-//void orderDataForm::operator=(const orderDataForm& order):
-//    order_id(order.order_id), depature_time(order.departure_time),
-//    end_time(order.end_time), orig_lng(order.orig_lng),
-//    orig_lat(order)
-//{
-
-//}
-
-
-//gridDataForm::gridDataForm(QStringList lst):
-//    vertex0(lst[1].trimmed().toDouble(), lst[2].trimmed().toDouble()),
-//    vertex1(lst[3].trimmed().toDouble(), lst[4].trimmed().toDouble()),
-//    vertex2(lst[5].trimmed().toDouble(), lst[6].trimmed().toDouble()),
-//    vertex3(lst[7].trimmed().toDouble(), lst[8].trimmed().toDouble())
-//{
-//    grid_id = lst[0].trimmed().toUInt();
-//}
 
 bool timeLessThan(orderDataForm order1, orderDataForm order2)
 {
